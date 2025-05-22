@@ -16,12 +16,85 @@ document.addEventListener("DOMContentLoaded", () => {
     function showToast(message, type = "success") {
       const toastContainer = document.createElement("div")
       toastContainer.className = `toast ${type}`
-      toastContainer.textContent = message
+      //toastContainer.textContent = message
       document.body.appendChild(toastContainer)
 
       setTimeout(() => {
         document.body.removeChild(toastContainer)
       }, 3000)
+    }
+
+    // Function to show cigarette details in modal
+    function showCigaretteDetails(cigarette, brand, isGroupCigarette = false) {
+      console.log("Opening cigarette details modal", cigarette) // Debug log
+
+      // Set title
+      document.getElementById("cig-detail-title").textContent = "Cigarette Details"
+
+      // Format date and time
+      const date = new Date(cigarette.created_at)
+      const formattedDate = date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+      const formattedTime = date.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      })
+
+      // Set cigarette info
+      document.getElementById("cig-detail-brand").textContent = brand || "Cigarette"
+      document.getElementById("cig-detail-date").textContent = formattedDate
+      document.getElementById("cig-detail-time").textContent = formattedTime
+
+      // Set notes (or default message if no notes)
+      const notesEl = document.getElementById("cig-detail-notes")
+      notesEl.textContent = cigarette.notes || "No notes added"
+
+      // Handle user info for group cigarettes
+      const userInfoSection = document.getElementById("cig-detail-user")
+      if (isGroupCigarette && cigarette.profiles) {
+        userInfoSection.style.display = "block"
+
+        // Set username
+        document.getElementById("cig-detail-username").textContent = cigarette.profiles.username || "Unknown User"
+
+        // Set avatar
+        const avatarContainer = document.getElementById("cig-detail-avatar")
+        avatarContainer.innerHTML = cigarette.profiles.avatar_url
+          ? `<img src="${cigarette.profiles.avatar_url}" alt="User Avatar" onerror="this.src='/placeholder.svg?height=50&width=50'">`
+          : `<img src="/placeholder.svg?height=50&width=50" alt="User Avatar">`
+      } else {
+        userInfoSection.style.display = "none"
+      }
+
+      // Handle image
+      const imageContainer = document.getElementById("cig-detail-image-container")
+      const imageEl = document.getElementById("cig-detail-image")
+
+      if (cigarette.pic_url) {
+        imageContainer.style.display = "block"
+        imageEl.innerHTML = `<img src="${cigarette.pic_url}" alt="Cigarette Photo" onerror="this.parentNode.innerHTML='No image available'">`
+      } else {
+        imageContainer.style.display = "none"
+        imageEl.innerHTML = ""
+      }
+
+      // Show modal
+      if (typeof window.showModal === "function") {
+        window.showModal("cigarette-detail-modal")
+      } else {
+        // Fallback if showModal function is not available
+        const modal = document.getElementById("cigarette-detail-modal")
+        if (modal) {
+          modal.style.display = "flex"
+        } else {
+          console.error("Modal element not found")
+        }
+      }
     }
 
     // Initialize the application
@@ -226,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // If there's a photo URL, use it instead of the emoji
           if (cigarette.pic_url) {
             iconHtml = `
-              <div class="recent-icon" style="width: 40px; height: 40px; overflow: hidden; border-radius: 5px;">
+              <div class="recent-icon" style="width: 40px; height: 40px; min-width: 40px; overflow: hidden; border-radius: 5px;">
                 <img src="${cigarette.pic_url}" 
                      alt="Cigarette Photo" 
                      style="width: 100%; height: 100%; object-fit: cover;"
@@ -237,13 +310,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const listItem = document.createElement("li")
           listItem.className = "recent-item"
+          listItem.style.alignItems = "flex-start" // Align items to the top
           listItem.innerHTML = `
-                      <div class="recent-info">
-                          <div class="recent-brand">${profile.cigarette_brand || "Cigarette"}</div>
-                          <div class="recent-meta">${relativeDate}, ${timeString} • ${cigarette.notes || "Solo"}</div>
-                      </div>
-                      ${iconHtml}
-                  `
+  <div class="recent-info" style="flex: 1; min-width: 0;">
+      <div class="recent-brand">${profile.cigarette_brand || "Cigarette"}</div>
+      <div class="recent-meta" style="word-wrap: break-word;">${relativeDate}, ${timeString} • ${cigarette.notes || "Solo"}</div>
+  </div>
+  ${iconHtml}
+`
 
           recentList.appendChild(listItem)
         })
@@ -467,6 +541,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // Load group activity
     async function loadGroupActivity(groupId) {
       try {
+        // Clear the activity tab content first to prevent duplicates
+        const activityTab = document.getElementById("activity-tab")
+
+        // Preserve the chart element which should be the first child
+        const chartElement = activityTab.querySelector(".chart-container")
+        const statsElement = activityTab.querySelector(".stats-container")
+
+        // Clear everything else
+        activityTab.innerHTML = ""
+
+        // Re-add the chart and stats elements
+        if (chartElement) activityTab.appendChild(chartElement)
+        if (statsElement) activityTab.appendChild(statsElement)
+
         // Get group activity
         const activity = await window.dataService.getGroupActivity(groupId)
 
@@ -564,10 +652,11 @@ document.addEventListener("DOMContentLoaded", () => {
               const cigItem = document.createElement("div")
               cigItem.className = "group-item"
               cigItem.style.marginBottom = "10px"
+              cigItem.style.alignItems = "flex-start" // Align items to the top
 
               // Create user avatar and info
               const avatarHtml = `
-                <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; margin-right: 10px;">
+                <div style="width: 40px; height: 40px; min-width: 40px; border-radius: 50%; overflow: hidden; margin-right: 10px;">
                   <img src="${cig.profiles?.avatar_url || "/placeholder.svg?height=40&width=40"}" 
                        alt="User Avatar" 
                        style="width: 100%; height: 100%; object-fit: cover;"
@@ -579,7 +668,7 @@ document.addEventListener("DOMContentLoaded", () => {
               let cigImageHtml = ""
               if (cig.pic_url) {
                 cigImageHtml = `
-                  <div style="width: 50px; height: 50px; border-radius: 5px; overflow: hidden; margin-left: 10px;">
+                  <div style="width: 50px; height: 50px; min-width: 50px; border-radius: 5px; overflow: hidden; margin-left: 10px;">
                     <img src="${cig.pic_url}" 
                          alt="Cigarette Photo" 
                          style="width: 100%; height: 100%; object-fit: cover;"
@@ -587,22 +676,30 @@ document.addEventListener("DOMContentLoaded", () => {
                   </div>
                 `
               } else {
-                cigImageHtml = `<div style="margin-left: 10px; font-size: 24px;">🚬</div>`
+                cigImageHtml = `<div style="margin-left: 10px; min-width: 24px; font-size: 24px;">🚬</div>`
               }
 
               cigItem.innerHTML = `
-                <div style="display: flex; align-items: center;">
-                  ${avatarHtml}
-                  <div>
-                    <div style="font-weight: bold;">${cig.profiles?.username || "Unknown User"}</div>
-                    <div style="font-size: 12px; color: var(--text-secondary);">${relativeTime}, ${timeString}</div>
-                  </div>
-                </div>
-                <div style="display: flex; align-items: center;">
-                  ${cig.notes ? `<div style="margin-right: 10px; font-size: 12px; color: var(--text-secondary);">${cig.notes}</div>` : ""}
-                  ${cigImageHtml}
-                </div>
-              `
+  <div style="display: flex; align-items: flex-start; flex: 1; min-width: 0;">
+    ${avatarHtml}
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-weight: bold;">${cig.profiles?.username || "Unknown User"}</div>
+      <div style="font-size: 12px; color: var(--text-secondary);">${relativeTime}, ${timeString}</div>
+      ${cig.notes ? `<div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; word-wrap: break-word;">${cig.notes}</div>` : ""}
+    </div>
+  </div>
+  <div style="flex-shrink: 0; margin-left: 10px;">
+    ${cigImageHtml}
+  </div>
+`
+              // Add click event to show details
+              cigItem.addEventListener("click", () => {
+                // Get the brand from the user's profile if available
+                const memberProfile = members.find((m) => m.id === cig.user_id)
+                const brand = memberProfile?.cigarette_brand || "Cigarette"
+
+                showCigaretteDetails(cig, brand, true)
+              })
 
               cigList.appendChild(cigItem)
             })
@@ -759,7 +856,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // If there's a photo URL, use it instead of the emoji
             if (log.pic_url) {
               iconHtml = `
-                <div style="width: 40px; height: 40px; overflow: hidden; border-radius: 5px;">
+                <div style="width: 40px; height: 40px; min-width: 40px; overflow: hidden; border-radius: 5px;">
                   <img src="${log.pic_url}" 
                        alt="Cigarette Photo" 
                        style="width: 100%; height: 100%; object-fit: cover;"
@@ -770,14 +867,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const item = document.createElement("div")
             item.className = "group-item"
-            item.style.cursor = "default"
+            item.style.alignItems = "flex-start" // Align items to the top
             item.innerHTML = `
-                        <div class="group-info">
-                            <div class="group-name">${profile.cigarette_brand || "Cigarette"}</div>
-                            <div class="group-meta">${time} • ${log.notes || "Solo"}</div>
-                        </div>
-                        <div>${iconHtml}</div>
-                    `
+  <div class="group-info" style="flex: 1; min-width: 0;">
+      <div class="group-name">${profile.cigarette_brand || "Cigarette"}</div>
+      <div class="group-meta" style="word-wrap: break-word;">${time} • ${log.notes || "Solo"}</div>
+  </div>
+  <div style="flex-shrink: 0;">${iconHtml}</div>
+`
 
             dateSection.appendChild(item)
           })
@@ -852,7 +949,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // If there's a photo URL, use it instead of the emoji
             if (log.pic_url) {
               iconHtml = `
-                <div style="width: 40px; height: 40px; overflow: hidden; border-radius: 5px;">
+                <div style="width: 40px; height: 40px; min-width: 40px; overflow: hidden; border-radius: 5px;">
                   <img src="${log.pic_url}" 
                        alt="Cigarette Photo" 
                        style="width: 100%; height: 100%; object-fit: cover;"
@@ -863,14 +960,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const item = document.createElement("div")
             item.className = "group-item"
-            item.style.cursor = "default"
+            item.style.alignItems = "flex-start" // Align items to the top
             item.innerHTML = `
-                    <div class="group-info">
-                        <div class="group-name">${profile.cigarette_brand || "Cigarette"}</div>
-                        <div class="group-meta">${time} • ${log.notes || "Solo"}</div>
-                    </div>
-                    <div>${iconHtml}</div>
-                `
+  <div class="group-info" style="flex: 1; min-width: 0;">
+      <div class="group-name">${profile.cigarette_brand || "Cigarette"}</div>
+      <div class="group-meta" style="word-wrap: break-word;">${time} • ${log.notes || "Solo"}</div>
+  </div>
+  <div style="flex-shrink: 0;">${iconHtml}</div>
+`
 
             dateSection.appendChild(item)
           })
@@ -1207,4 +1304,25 @@ window.dataService.getGroupScoreboard = async (groupId) => {
   )
 
   return scoreboard.sort((a, b) => a.count - b.count)
+}
+
+// Add this function at the end of the file, outside any other functions
+// Ensure we have a hideModal function if it doesn't exist
+if (typeof window.hideModal !== "function") {
+  window.hideModal = (modalId) => {
+    const modal = document.getElementById(modalId)
+    if (modal) {
+      modal.style.display = "none"
+    }
+  }
+}
+
+// Ensure we have a showModal function if it doesn't exist
+if (typeof window.showModal !== "function") {
+  window.showModal = (modalId) => {
+    const modal = document.getElementById(modalId)
+    if (modal) {
+      modal.style.display = "flex"
+    }
+  }
 }

@@ -28,9 +28,10 @@ const urlsToCache = [
   '/index.html',
   '/connectioncheck.html',
   '/loginsignup.html',
+  '/manifest.json',
   '/login.html',
   '/signup.html',
-  '/manifest.json',
+  '/home.html',
   "https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_192.png",
   // Add other assets like CSS, JS, and images here
 ];
