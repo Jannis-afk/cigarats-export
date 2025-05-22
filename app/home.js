@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function showToast(message, type = "success") {
       const toastContainer = document.createElement("div")
       toastContainer.className = `toast ${type}`
-      //toastContainer.textContent = message
+      toastContainer.textContent = message
       document.body.appendChild(toastContainer)
 
       setTimeout(() => {
@@ -102,6 +102,22 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         console.log("Initializing app...") // Debug line
 
+        // Hide the log button until initialization is complete
+        const logButton = document.querySelector(".log-button-container")
+        if (logButton) {
+          logButton.style.display = "none"
+          // Add a loading indicator in its place
+          const loadingIndicator = document.createElement("div")
+          loadingIndicator.className = "log-button-loading"
+          loadingIndicator.innerHTML = `
+    <div style="text-align: center; padding: 18px; color: var(--text-secondary);">
+      <div class="loading-spinner" style="width: 24px; height: 24px; margin: 0 auto 10px;"></div>
+      <div>Initializing...</div>
+    </div>
+  `
+          logButton.parentNode.insertBefore(loadingIndicator, logButton)
+        }
+
         // 1. Check authentication
         const {
           data: { user },
@@ -129,6 +145,25 @@ document.addEventListener("DOMContentLoaded", () => {
         // 4. Initialize avatar upload
         if (window.avatarUpload && window.avatarUpload.init) {
           window.avatarUpload.init()
+        }
+
+        // Initialize cigarette photo upload
+        if (window.cigarettePhotoUpload && window.cigarettePhotoUpload.init) {
+          window.cigarettePhotoUpload.init()
+          console.log("Cigarette photo upload initialized")
+        } else {
+          console.error("Cigarette photo upload module not found")
+        }
+
+        // Show the log button after initialization is complete
+        const logButtonFinal = document.querySelector(".log-button-container")
+        const loadingIndicatorFinal = document.querySelector(".log-button-loading")
+        if (logButtonFinal) {
+          logButtonFinal.style.display = "block"
+          if (loadingIndicatorFinal) {
+            loadingIndicatorFinal.remove()
+          }
+          console.log("Log button is now visible - initialization complete")
         }
       } catch (error) {
         console.error("Initialization error:", error)
@@ -604,6 +639,17 @@ document.addEventListener("DOMContentLoaded", () => {
         statValues[1].textContent = avgPerPerson
         statValues[2].textContent = `$${totalMoneySpent.toFixed(0)}`
         statValues[3].textContent = timeSpent
+
+        // Remove existing cigarette list if it exists
+        const existingHeader = document.querySelector("#activity-tab h3")
+        if (existingHeader) {
+          // Find and remove the header and the list that follows it
+          const existingList = document.querySelector("#activity-tab .group-cigs-list")
+          if (existingList) {
+            existingList.remove()
+          }
+          existingHeader.remove()
+        }
 
         // Get last 10 cigarettes smoked by group members
         const { data: groupCigs, error: groupCigsError } = await window.supabase
@@ -1304,6 +1350,46 @@ window.dataService.getGroupScoreboard = async (groupId) => {
   )
 
   return scoreboard.sort((a, b) => a.count - b.count)
+}
+
+// Add this function to ensure the log cigarette modal is properly initialized
+function ensureLogModalInitialized() {
+  // Check if the modal elements exist
+  const logModal = document.getElementById("log-modal")
+  const photoUploadArea = document.getElementById("cigarette-photo-upload")
+  const photoInput = document.getElementById("cigarette-photo-input")
+
+  if (!logModal || !photoUploadArea || !photoInput) {
+    console.error("Log modal elements not found, cannot initialize")
+    return false
+  }
+
+  // Initialize cigarette photo upload if it exists but hasn't been initialized
+  if (window.cigarettePhotoUpload && typeof window.cigarettePhotoUpload.init === "function") {
+    window.cigarettePhotoUpload.init()
+    console.log("Cigarette photo upload initialized from ensureLogModalInitialized")
+  }
+
+  return true
+}
+
+// Modify the showModal function to ensure initialization when opening the log modal
+if (typeof window.showModal !== "function") {
+  window.showModal = (modalId) => {
+    const modal = document.getElementById(modalId)
+    if (modal) {
+      // If opening the log modal, ensure it's initialized first
+      if (modalId === "log-modal") {
+        if (!ensureLogModalInitialized()) {
+          console.error("Cannot open log modal - required elements not found")
+          //showToast("App is still initializing. Please try again in a moment.", "error")
+          return
+        }
+      }
+
+      modal.style.display = "flex"
+    }
+  }
 }
 
 // Add this function at the end of the file, outside any other functions

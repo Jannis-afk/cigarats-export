@@ -14,40 +14,48 @@
   let currentUserId = null
 
   // Initialize cigarette photo upload functionality
-  async function initCigarettePhotoUpload() {
-    try {
-      // Get current user ID
-      const {
-        data: { user },
-        error,
-      } = await window.supabase.auth.getUser()
-      if (error) throw error
-      if (!user) return
+// Modify the initCigarettePhotoUpload function to signal when it's complete
+async function initCigarettePhotoUpload() {
+  let currentUserId, photoUploadArea, photoInput // Declare variables here
 
-      currentUserId = user.id
+  try {
+    // Get current user ID
+    const {
+      data: { user },
+      error,
+    } = await window.supabase.auth.getUser()
+    if (error) throw error
+    if (!user) return false // Return false to indicate initialization failed
 
-      // Find photo upload elements
-      photoUploadArea = document.getElementById("cigarette-photo-upload")
-      photoInput = document.getElementById("cigarette-photo-input")
+    currentUserId = user.id
 
-      if (!photoUploadArea || !photoInput) {
-        console.log("Cigarette photo upload elements not found")
-        return
-      }
+    // Find photo upload elements
+    photoUploadArea = document.getElementById("cigarette-photo-upload")
+    photoInput = document.getElementById("cigarette-photo-input")
 
-      // Make photo upload area clickable
-      photoUploadArea.addEventListener("click", () => {
-        photoInput.click()
-      })
-
-      // Add change event to photo input
-      photoInput.addEventListener("change", handlePhotoSelection)
-
-      console.log("Cigarette photo upload initialized")
-    } catch (error) {
-      console.error("Error initializing cigarette photo upload:", error)
+    if (!photoUploadArea || !photoInput) {
+      console.log("Cigarette photo upload elements not found, will retry in 1 second")
+      // Retry initialization after a delay
+      setTimeout(initCigarettePhotoUpload, 1000)
+      return false // Return false to indicate initialization failed
     }
+
+    // Make photo upload area clickable
+    photoUploadArea.addEventListener("click", () => {
+      photoInput.click()
+    })
+
+    // Add change event to photo input
+    photoInput.addEventListener("change", handlePhotoSelection)
+
+    console.log("Cigarette photo upload initialized successfully")
+    return true // Return true to indicate successful initialization
+  } catch (error) {
+    console.error("Error initializing cigarette photo upload:", error)
+    return false // Return false to indicate initialization failed
   }
+}
+
 
   // Handle photo selection
   function handlePhotoSelection(event) {
