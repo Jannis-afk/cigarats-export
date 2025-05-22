@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#8A2BE2">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Cigarette Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="/placeholder.svg?height=192&width=192">
+    <style>
+        :root {
+            --primary-color: #8A2BE2; /* Purple */
+            --secondary-color: #1E90FF; /* Blue */
+            --dark-bg: #000000;
+            --card-bg: rgba(30, 30, 30, 0.7);
+            --text-color: #ffffff;
+            --text-secondary: #cccccc;
+            --border-radius: 10px;
+            --gradient: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 70px; /* Space for bottom nav */
+            position: relative;
+        }
+        
+        /* Background elements */
+        .bg-gradient-1 {
+            position: fixed;
+            top: 10%;
+            left: -100px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: -1;
+            border-radius: 50%;
+        }
+        
+        .bg-gradient-2 {
+            position: fixed;
+            bottom: 10%;
+            right: -100px;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(30, 144, 255, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: -1;
+            border-radius: 50%;
+        }
+        
+        /* Header */
+        .header {
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 10px;
+        }
+        
+        .app-title {
+            font-size: 24px;
+            font-weight: bold;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(20, 20, 20, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+        
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        /* Buttons */
+        .btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-large {
+            padding: 16px 24px;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        
+        /* Stats */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: rgba(40, 40, 40, 0.6);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(30, 144, 255, 0.2);
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        /* Groups */
+        .group-list {
+            list-style: none;
+        }
+        
+        .group-item {
+            background-color: rgba(40, 40, 40, 0.6);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(30, 144, 255, 0.1);
+        }
+        
+        .group-item:hover {
+            transform: translateX(5px);
+            border-color: rgba(30, 144, 255, 0.3);
+        }
+        
+        .group-info {
+            flex: 1;
+        }
+        
+        .group-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .group-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background-color: rgba(30, 30, 30, 0.8);
+            color: white;
+            font-size: 16px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.3);
+        }
+        
+        /* Photo upload */
+        .photo-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            border: 2px dashed rgba(138, 43, 226, 0.4);
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .photo-upload:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(138, 43, 226, 0.1);
+        }
+        
+        .photo-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .photo-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        /* Screens */
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Profile */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #333;
+            margin-right: 15px;
+            border: 3px solid;
+            border-image: var(--gradient) 1;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 50%;
+        }
+        
+        .avatar-overlay span {
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .profile-avatar:hover .avatar-overlay {
+            opacity: 1;
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .profile-bio {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .profile-meta {
+            margin-top: 10px;
+        }
+        
+        /* Charts */
+        .chart-container {
+            height: 200px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            width: 8%;
+            background: var(--gradient);
+            border-radius: 5px 5px 0 0;
+            transition: height 0.5s ease;
+        }
+        
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            width: 8%;
+        }
+        
+        /* Scoreboard */
+        .scoreboard {
+            list-style: none;
+        }
+        
+        .scoreboard-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .scoreboard-rank {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .scoreboard-user {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        
+        .scoreboard-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #333;
+            margin-right: 10px;
+            overflow: hidden;
+        }
+        
+        .scoreboard-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .scoreboard-name {
+            font-size: 14px;
+        }
+        
+        .scoreboard-score {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        /* Log button */
+        .log-button-container {
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .log-button {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+        }
+        
+        .log-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.5);
+        }
+        
+        .log-button-icon {
+            font-size: 24px;
+        }
+        
+        /* Recent cigarettes */
+        .recent-list {
+            list-style: none;
+        }
+        
+        .recent-item {
+            background-color: rgba(40, 40, 40, 0.6);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(30, 144, 255, 0.1);
+        }
+        
+        .recent-info {
+            flex: 1;
+        }
+        
+        .recent-brand {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .recent-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .recent-icon {
+            font-size: 20px;
+            margin-left: 10px;
+        }
+        
+        /* Group code */
+        .group-code-container {
+            background-color: rgba(40, 40, 40, 0.6);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .group-code-container:hover {
+            background-color: rgba(50, 50, 50, 0.7);
+            transform: translateY(-2px);
+        }
+        
+        .group-code-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .group-code {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: var(--primary-color);
+        }
+        
+        /* Smoke-free timer */
+        .timer-container {
+            background-color: rgba(40, 40, 40, 0.6);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            border: 1px solid rgba(30, 144, 255, 0.2);
+        }
+        
+        .timer-label {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        
+        .timer-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        
+        .timer-sublabel {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        /* Join group buttons */
+        .join-group-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .join-group-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--secondary-color);
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Member list */
+        .member-list {
+            list-style: none;
+        }
+        
+        .member-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #333;
+            margin-right: 15px;
+            overflow: hidden;
+        }
+        
+        .member-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .member-info {
+            flex: 1;
+        }
+        
+        .member-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .member-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .member-action {
+            color: var(--secondary-color);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        /* Code input */
+        .code-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .code-input {
+            flex: 1;
+            padding: 15px;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background-color: rgba(30, 30, 30, 0.8);
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+        }
+        
+        .code-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.3);
+        }
+        
+        /* Success message */
+        .success-message {
+            background-color: rgba(40, 40, 40, 0.8);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .success-icon {
+            font-size: 20px;
+            color: var(--primary-color);
+        }
+        
+        .success-text {
+            flex: 1;
+            font-size: 14px;
+        }
+        
+        /* Loading indicator */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+        }
+
+        #toast-container > div {
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .toast-success {
+            background-color: rgba(46, 204, 113, 0.9);
+            color: white;
+        }
+
+        .toast-error {
+            background-color: rgba(231, 76, 60, 0.9);
+            color: white;
+        }
+    </style>
+    <link rel="stylesheet" href="avatar-upload.css">
+</head>
+<body>
+    <!-- Background elements -->
+    <div class="bg-gradient-1"></div>
+    <div class="bg-gradient-2"></div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <!-- Logo will go here -->
+            <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_192.png?v=1747451429642" alt="App Icon" width="100" height="100" />
+        </div>
+        <div style="margin-bottom: 2px;"></div>
+    </div>
+
+    <!-- Home Screen -->
+    <div id="home-screen" class="screen active">
+        <div class="container">
+            <!-- Stats Summary -->
+            <div class="card">
+                <div class="card-title">
+                    Your Stats
+                    <button class="btn btn-small" onclick="showScreen('profile-screen')">View All</button>
+                </div>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">This Week</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">$0</div>
+                        <div class="stat-label">Money Spent</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">0h 0m</div>
+                        <div class="stat-label">Time Spent</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Big Log Button -->
+            <div class="log-button-container">
+                <button class="log-button" onclick="showModal('log-modal')">
+                    <span class="log-button-icon">🚬</span>
+                    <span>Log a Cigarette</span>
+                </button>
+            </div>
+            
+            <!-- Recent Cigarettes -->
+            <div class="card">
+                <div class="card-title">Recent Cigarettes</div>
+                <ul class="recent-list">
+                    <!-- Recent cigarettes will be loaded here -->
+                    <li class="recent-item">
+                        <div class="recent-info">
+                            <div class="recent-brand">Loading...</div>
+                            <div class="recent-meta">Please wait...</div>
+                        </div>
+                        <div class="recent-icon">🚬</div>
+                    </li>
+                </ul>
+                <button class="btn btn-block btn-outline" style="margin-top: 15px;" onclick="showScreen('profile-screen'); switchTab('history-tab', document.querySelectorAll('#profile-screen .tab')[1]);">View Full History</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Groups Screen -->
+    <div id="groups-screen" class="screen">
+        <div class="container">
+            <div class="card">
+                <div class="card-title">Your Groups</div>
+                
+                <!-- Join Group Buttons -->
+                <div class="join-group-buttons">
+                    <button class="btn join-group-btn" onclick="showModal('join-group-modal')">
+                        <span>🔑</span> Join with Code
+                    </button>
+                    <button class="btn join-group-btn" onclick="showModal('create-group-modal')">
+                        <span>➕</span> Create Group
+                    </button>
+                </div>
+                
+                <ul class="group-list">
+                    <!-- Groups will be loaded here -->
+                    <li class="group-item">
+                        <div class="group-info">
+                            <div class="group-name">Loading...</div>
+                            <div class="group-meta">Please wait...</div>
+                        </div>
+                        <div>›</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Details Screen -->
+    <div id="group-details-screen" class="screen" data-group-id="">
+        <div class="container">
+            <div class="card">
+              
+              
+<div class="card-title">
+  <span id="group-details-name">Group Name</span>
+  <button class="btn btn-small btn-outline" onclick="showScreen('groups-screen')">Back</button>
+</div>
+
+<!-- Group Description -->
+<div class="group-description" id="group-description" style="margin-bottom: 15px; color: var(--text-secondary); font-size: 14px; line-height: 1.5;">
+  No description available
+</div>
+
+<!-- Simplified Group Code Display -->
+<div class="group-code-container" onclick="copyGroupCode()">
+  <div class="group-code-label">Group Code (Tap to Copy)</div>
+  <div class="group-code" id="group-code">XYZ123</div>
+</div>
+              
+              
+                
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('scoreboard-tab', this)">Scoreboard</div>
+                    <div class="tab" onclick="switchTab('members-tab', this)">Members</div>
+                    <div class="tab" onclick="switchTab('activity-tab', this)">Activity</div>
+                </div>
+                
+                <div id="scoreboard-tab" class="tab-content active">
+                    <div style="text-align: center; margin-bottom: 15px; color: var(--text-secondary);">
+                        Least cigarettes smoked this week
+                    </div>
+                    <ul class="scoreboard" id="group-scoreboard-list">
+                        <!-- Scoreboard will be loaded here -->
+                        <li class="scoreboard-item">
+                            <div class="scoreboard-rank">-</div>
+                            <div class="scoreboard-user">
+                                <div class="scoreboard-avatar">
+                                    <img src="/placeholder.svg?height=30&width=30" alt="User Avatar">
+                                </div>
+                                <div class="scoreboard-name">Loading...</div>
+                            </div>
+                            <div class="scoreboard-score">-</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div id="members-tab" class="tab-content">
+                    <ul class="member-list" id="group-members-list">
+                        <!-- Members will be loaded here -->
+                        <li class="member-item">
+                            <div class="member-avatar">
+                                <img src="/placeholder.svg?height=40&width=40" alt="Member Avatar">
+                            </div>
+                            <div class="member-info">
+                                <div class="member-name">Loading...</div>
+                                <div class="member-status">Please wait...</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div id="activity-tab" class="tab-content">
+                    <div class="chart-container">
+                        <div class="chart-bar" style="left: 5%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 5%;">Mon</div>
+                        
+                        <div class="chart-bar" style="left: 18%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 18%;">Tue</div>
+                        
+                        <div class="chart-bar" style="left: 31%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 31%;">Wed</div>
+                        
+                        <div class="chart-bar" style="left: 44%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 44%;">Thu</div>
+                        
+                        <div class="chart-bar" style="left: 57%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 57%;">Fri</div>
+                        
+                        <div class="chart-bar" style="left: 70%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 70%;">Sat</div>
+                        
+                        <div class="chart-bar" style="left: 83%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 83%;">Sun</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 40px;"></div>
+                    
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Avg/Person</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">$0</div>
+                            <div class="stat-label">Money Spent</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0h 0m</div>
+                            <div class="stat-label">Time Spent</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Group Actions -->
+                <div class="group-actions">
+                    <button class="btn btn-outline btn-block">Leave Group</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Screen -->
+    <div id="profile-screen" class="screen">
+        <div class="container">
+            <div class="card">
+                <div class="card-title">
+                    Your Profile
+                    <button class="btn btn-small btn-outline" onclick="showScreen('home-screen')">Back</button>
+                </div>
+                
+                <div class="profile-header">
+                    <div class="profile-avatar" id="avatar-upload">
+                        <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_192.png?v=1747451429642" alt="Avatar" width="75" height="75" />
+                        <div class="avatar-overlay">
+                            <span>Change</span>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name">Loading...</div>
+                        <div class="profile-bio">Joined: <span id="join-date">Loading...</span></div>
+                    </div>
+                </div>
+                
+                
+                <!-- Smoke-Free Timer -->
+                <div class="timer-container">
+                    <div class="timer-label">Smoke-Free Time</div>
+                    <div class="timer-value" id="smoke-free-timer">0h 0m</div>
+                    <div class="timer-sublabel">Since your last cigarette</div>
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('stats-tab', this)">Stats</div>
+                    <div class="tab" onclick="switchTab('history-tab', this)">History</div>
+                    <div class="tab" onclick="switchTab('settings-tab', this)">Settings</div>
+                </div>
+                
+                <div id="stats-tab" class="tab-content active">
+                    <div class="chart-container">
+                        <div class="chart-bar" style="left: 5%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 5%;">Sun</div>
+                        
+                        <div class="chart-bar" style="left: 18%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 18%;">Mon</div>
+                        
+                        <div class="chart-bar" style="left: 31%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 31%;">Tue</div>
+                        
+                        <div class="chart-bar" style="left: 44%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 44%;">Wed</div>
+                        
+                        <div class="chart-bar" style="left: 57%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 57%;">Thu</div>
+                        
+                        <div class="chart-bar" style="left: 70%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 70%;">Fri</div>
+                        
+                        <div class="chart-bar" style="left: 83%; height: 0%;"></div>
+                        <div class="chart-label" style="left: 83%;">Sat</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 40px;"></div>
+                    
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Today</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">This Week</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">$0</div>
+                            <div class="stat-label">Money Spent</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0h 0m</div>
+                            <div class="stat-label">Time Spent</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card" style="margin-top: 20px;">
+                        <div class="card-title">Insights</div>
+                        <ul style="padding-left: 20px; color: var(--text-secondary);">
+                            <li style="margin-bottom: 10px;">Loading insights...</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div id="history-tab" class="tab-content">
+                    <!-- Cigarette history will be loaded here -->
+                    <div style="text-align: center; padding: 20px; color: #ccc;">
+                        Loading history...
+                    </div>
+                </div>
+                
+                <div id="settings-tab" class="tab-content">
+                    <form>
+                        <div class="form-group">
+                            <div class="form-label">Display Name</div>
+                            <input type="text" class="form-input" placeholder="Your Name">
+                        </div>
+                        
+                        
+                        <!--
+                         <div class="form-group">
+                            <div class="form-label">Email</div>
+                            <input type="email" class="form-input" placeholder="your.email@example.com">
+                        </div>
+                         -->
+                        
+                        
+                        <div class="form-group">
+                            <div class="form-label">Cigarette Brand</div>
+                            <input type="text" class="form-input" placeholder="Cigarette Brand">
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">Price per Pack</div>
+                            <input type="text" class="form-input" placeholder="Price per Pack">
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">Cigarettes per Pack</div>
+                            <input type="number" class="form-input" placeholder="20">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-block" style="margin-top: 20px;">Save Changes</button>
+                    </form>
+                    <button class="btn btn-block btn-outline" style="margin-top: 10px;">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="#" class="nav-item active" onclick="showScreen('home-screen'); return false;">
+            <div class="nav-icon">
+              <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/home_icon_128.png?v=1747536038400" alt="Home" width="32" height="32" />
+          </div>
+            <div>
+          </div>
+        </a>
+        <a href="#" class="nav-item" onclick="showScreen('groups-screen'); return false;">
+            <div class="nav-icon">
+                        <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/group_icon_128.png?v=1747536034007" alt="Groups" width="32" height="32" />
+          </div>
+            <div>
+          </div>
+        </a>
+        <a href="#" class="nav-item" onclick="showScreen('profile-screen'); return false;">
+            <div class="nav-icon">
+                        <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/profile_icon_128.png?v=1747536050198" alt="Profile" width="32" height="32" />
+          </div>
+            <div>
+          </div>
+        </a>
+    </div>
+
+    <!-- Modals -->
+    <!-- Log Cigarette Modal -->
+<!-- Log Cigarette Modal -->
+<div id="log-modal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="hideModal('log-modal')">×</button>
+        <div class="modal-title">Log a Cigarette</div>
+        
+        <form id="log-cigarette-form">
+            <div class="form-group">
+                <div class="form-label">Brand</div>
+                <input type="text" class="form-input" placeholder="Cigarette Brand">
+            </div>
+          
+            <div class="form-group">
+                <div class="form-label">Add Photo (Optional)</div>
+                <div class="photo-upload" style="height: 150px;" id="cigarette-photo-upload">
+                    <div class="photo-icon">📸</div>
+                    <div class="photo-text">Take a photo or upload from gallery</div>
+                </div>
+                <input type="file" id="cigarette-photo-input" accept="image/*" capture="environment" style="display: none;">
+            </div>
+            
+            <div class="form-group">
+                <div class="form-label">Notes (Optional)</div>
+                <textarea class="form-input" rows="3" placeholder="Add any notes about this cigarette..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-block">Log Cigarette</button>
+        </form>
+    </div>
+</div>
+
+    <!-- Create Group Modal -->
+    <div id="create-group-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('create-group-modal')">×</button>
+            <div class="modal-title">Create New Group</div>
+            
+            <form>
+                <div class="form-group">
+                    <div class="form-label">Group Name</div>
+                    <input type="text" class="form-input" placeholder="Enter group name" required>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">Description (Optional)</div>
+                    <textarea class="form-input" rows="3" placeholder="Describe your group..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-block">Create Group</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Join Group Modal -->
+    <div id="join-group-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('join-group-modal')">×</button>
+            <div class="modal-title">Join a Group</div>
+            
+            <form>
+                <div class="form-group">
+                    <div class="form-label">Enter Group Code</div>
+                    <div class="code-input-container">
+                        <input type="text" class="code-input" id="group-code-input" placeholder="XYZ123" maxlength="6" required>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">
+                        Group codes are 6 characters long and case-insensitive
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-block">Join Group</button>
+            </form>
+            
+            <div id="join-success-message" class="success-message" style="display: none;">
+                <div class="success-icon">✓</div>
+                <div class="success-text">Successfully joined <span id="joined-group-name">Group Name</span>!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avatar Upload Modal -->
+    <div id="avatar-upload-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideModal('avatar-upload-modal')">×</button>
+            <div class="modal-title">Update Profile Picture</div>
+            
+            <div class="photo-upload" style="height: 150px;" onclick="document.getElementById('avatar-file-input').click()">
+                <div class="photo-icon">📸</div>
+                <div class="photo-text">Tap to select a photo</div>
+            </div>
+            <input type="file" id="avatar-file-input" accept="image/*" style="display: none;">
+            
+            <button id="upload-avatar-btn" class="btn btn-block" style="margin-top: 20px;">Upload Photo</button>
+        </div>
+    </div>
+
+    <!-- Load Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Load ImageKit SDK -->
+    <script src="https://unpkg.com/imagekit-javascript@2.0.0/dist/imagekit.min.js"></script>
+    <script>
+      // 2. Initialize Supabase immediately
+      window.supabase = supabase.createClient(
+        'https://unbjsogmvwzfjitccfft.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuYmpzb2dtdnd6ZmppdGNjZmZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2NzU1NjgsImV4cCI6MjA2MzI1MTU2OH0.JQX-4mJ_IEtS-CGwYIGEcVsFLWeQjO1PQSm9jhbi-0Y'
+      );
+      console.log("Supabase initialized:", window.supabase); // Verify initialization
+    </script>
+
+    <!-- Load utils.js first -->
+    <script src="utils.js"></script>
+
+    <!-- Then load data.js -->
+    <script src="data.js"></script>
+
+    <!-- Load avatar-upload.js -->
+    <script src="avatar-upload.js"></script>
+  
+  <!-- Load upload-cig-pic.js -->
+    <script src="upload-cig-pic.js"></script>
+
+    <!-- Finally load home.js -->
+    <script src="home.js"></script>
+
+    <script>
+        // Navigation between screens
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show the selected screen
+            document.getElementById(screenId).classList.add('active');
+            
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Find and activate the corresponding nav item
+            const navMap = {
+                'home-screen': 0,
+                'groups-screen': 1,
+                'profile-screen': 2
+            };
+            
+            if (screenId in navMap) {
+                document.querySelectorAll('.nav-item')[navMap[screenId]].classList.add('active');
+            }
+        }
+        
+        // Tab switching
+        function switchTab(tabId, tabElement) {
+            // Get the parent element
+            const parent = tabElement.parentElement;
+            
+            // Remove active class from all tabs
+            parent.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            tabElement.classList.add('active');
+            
+            // Hide all tab contents
+            const tabContents = parent.parentElement.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show the selected tab content
+            document.getElementById(tabId).classList.add('active');
+        }
+        
+        // Modal handling
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        // Copy group code
+        function copyGroupCode() {
+            const code = document.getElementById('group-code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                //alert('Group code copied to clipboard!');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                // Fallback
+                const tempInput = document.createElement('input');
+                tempInput.value = code;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                //alert('Group code copied to clipboard!');
+            });
+        }
+        
+        // Photo upload handling
+        function triggerModalPhotoUpload() {
+            document.getElementById('modal-photo-input').click();
+        }
+        
+        function handleModalPhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Here you would typically upload the file to your server
+            console.log('Modal photo captured:', file);
+            
+            // For demo purposes, update the upload area
+            const uploadArea = event.target.previousElementSibling;
+            uploadArea.innerHTML = '<div class="photo-icon">✓</div><div class="photo-text">Photo selected</div>';
+        }
+        
+        // Show loading state
+        function showLoading(isLoading) {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = isLoading ? 'flex' : 'none';
+            }
+        }
+
+        // Show toast message
+        function showToast(message, type = 'success') {
+            // Check if toast container exists
+            let toastContainer = document.getElementById('toast-container');
+            
+            // Create toast container if it doesn't exist
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast-${type}`;
+            toast.textContent = message;
+            
+            // Add toast to container
+            toastContainer.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toastContainer.contains(toast)) {
+                        toastContainer.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Cigarette Tracker</title>
+    <!-- Add Supabase client library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            background-color: #0A0633;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .logo-container {
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            /* Placeholder for logo */
+            background-color: transparent;
+        }
+        
+        .app-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .form-container {
+            width: 85%;
+            max-width: 350px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(30, 30, 30, 0.5);
+            backdrop-filter: blur(5px);
+            margin-bottom: 20px;
+        }
+        
+        .form-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: #111;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #8A2BE2;
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.3);
+        }
+        
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        
+        .terms-checkbox input {
+            margin-top: 3px;
+        }
+        
+        .terms-checkbox label {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .terms-checkbox a {
+            color: #1E90FF;
+            text-decoration: none;
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 6px;
+            border: none;
+            background: linear-gradient(135deg, #1E90FF, #8A2BE2);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+        }
+        
+        .alternate-action {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .alternate-action a {
+            color: #8A2BE2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .back-button:hover {
+            color: #8A2BE2;
+        }
+        
+        .password-requirements {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            opacity: 0.6;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBack()">
+        ← Back
+    </button>
+    
+    <div class="logo-container">
+        <div class="logo">
+            <!-- Logo will go here -->
+          <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_192.png?v=1747451429642" alt="App Icon" width="120" height="120" />
+        </div>
+    </div>
+    
+    <div class="app-title">CigaRats</div>
+    
+    <div class="form-container">
+        <div class="form-title">Create your account</div>
+        
+        <form id="signupForm" onsubmit="handleSignup(event)">
+            <div class="input-group">
+                <label class="input-label" for="username">Username</label>
+                <input type="text" id="username" class="input-field" required>
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label" for="email">Email</label>
+                <input type="email" id="email" class="input-field" required>
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label" for="password">Password</label>
+                <input type="password" id="password" class="input-field" required>
+                <div class="password-requirements">
+                    Must be at least 8 characters with a number and special character
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label" for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" class="input-field" required>
+            </div>
+            
+            <div class="terms-checkbox">
+                <input type="checkbox" id="terms" required>
+                <label for="terms">
+                    I agree to the <a href="#" onclick="showTerms()">Terms of Service</a> and <a href="#" onclick="showPrivacy()">Privacy Policy</a>
+                </label>
+            </div>
+            
+            <button type="submit" class="submit-button">Create Account</button>
+        </form>
+    </div>
+    
+    <div class="alternate-action">
+        Already have an account? <a href="login.html">Login</a>
+    </div>
+    
+    <div class="footer">© 2025 CigaRats</div>
+    
+    <script>
+        // Initialize global functions
+        window.handleSignup = null;
+        window.showTerms = null;
+        window.showPrivacy = null;
+        window.goBack = null;
+    </script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+        
+        // Initialize Supabase client with proper options
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        })
+
+        // Check if user is already logged in
+        async function checkUser() {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                window.location.href = 'home.html'
+            }
+        }
+
+        // Run check on page load
+        checkUser()
+
+        async function handleSignup(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            console.log('Starting signup process...');
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            // Validate password strength
+            if (password.length < 8 || !/\d/.test(password) || !/[!@#$%^&*]/.test(password)) {
+                alert('Password must be at least 8 characters long and contain a number and special character');
+                return;
+            }
+            
+            try {
+                console.log('Attempting to sign up with Supabase...');
+                // Sign up the user
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            username: username,
+                            name: username,  // This is the correct field for display name
+                            display_name: username  // Adding both fields to ensure it works
+                        },
+                        emailRedirectTo: `${window.location.origin}/app/login.html`
+                    }
+                })
+
+                if (error) {
+                    console.error('Supabase signup error:', error);
+                    throw error;
+                }
+
+                console.log('Signup successful, data:', data);
+                alert('Account created successfully! Please check your email for verification. If you don\'t see it, check your spam folder.');
+                window.location.href = 'login.html'
+            } catch (error) {
+                console.error('Error in signup process:', error);
+                alert('Signup failed: ' + error.message)
+            }
+        }
+        
+        function showTerms() {
+            window.location.href = 'terms-privacy.html'
+        }
+        
+        function showPrivacy() {
+            window.location.href = 'terms-privacy.html'
+        }
+        
+        function goBack() {
+            window.location.href = 'loginsignup.html';
+        }
+
+        // Make functions available globally
+        window.handleSignup = handleSignup;
+        window.showTerms = showTerms;
+        window.showPrivacy = showPrivacy;
+        window.goBack = goBack;
+    </script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Cigarette Tracker</title>
+    <!-- Add Supabase client library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        body {
+            background-color: #0A0633;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .logo-container {
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            /* Placeholder for logo */
+            background-color: transparent;
+        }
+        
+        .app-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .form-container {
+            width: 85%;
+            max-width: 350px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(30, 30, 30, 0.5);
+            backdrop-filter: blur(5px);
+            margin-bottom: 20px;
+        }
+        
+        .form-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: #111;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #8A2BE2;
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.3);
+        }
+        
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        
+        .forgot-password a {
+            color: #1E90FF;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 6px;
+            border: none;
+            background: linear-gradient(135deg, #1E90FF, #8A2BE2);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+        }
+        
+        .alternate-action {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .alternate-action a {
+            color: #8A2BE2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .back-button:hover {
+            color: #8A2BE2;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            opacity: 0.6;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBack()">
+        ← Back
+    </button>
+    
+    <div class="logo-container">
+        <div class="logo">
+            <!-- Logo will go here -->
+          <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_192.png?v=1747451429642" alt="App Icon" width="120" height="120" />
+        </div>
+    </div>
+    
+    <div class="app-title">CigaRats</div>
+    
+    <div class="form-container">
+        <div class="form-title">Login to your account</div>
+        
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="input-group">
+                <label class="input-label" for="email">Email Address</label>
+                <input type="email" id="email" class="input-field" required>
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label" for="password">Password</label>
+                <input type="password" id="password" class="input-field" required>
+            </div>
+            
+            <div class="forgot-password">
+               <a href="#" onclick="forgotPassword()">  </a> 
+            </div>
+            
+            <button type="submit" class="submit-button">Login</button>
+        </form>
+    </div>
+    
+    <div class="alternate-action">
+        Don't have an account? <a href="signup.html">Sign up</a>
+    </div>
+    
+    <div class="footer">© 2025 CigaRats</div>
+    
+    <script>
+        // Initialize global functions
+        window.handleLogin = null;
+        window.forgotPassword = null;
+        window.goBack = null;
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+        
+        // Initialize Supabase client with proper options
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        })
+
+        // Check if user is already logged in
+        async function checkUser() {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                window.location.href = 'home.html'
+            }
+        }
+
+        // Run check on page load
+        checkUser()
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    console.error('Login error:', error);
+                    throw error;
+                }
+
+                console.log('Login successful:', data);
+                window.location.href = 'home.html';
+            } catch (error) {
+                console.error('Error in login process:', error);
+                alert('Login failed: ' + error.message);
+            }
+        }
+        
+        async function forgotPassword() {
+            const email = document.getElementById('email').value;
+            
+            if (!email) {
+                alert('Please enter your email address first');
+                return;
+            }
+
+            try {
+                const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/reset-password.html`,
+                })
+
+                if (error) throw error
+
+                alert('Password reset instructions have been sent to your email')
+            } catch (error) {
+                console.error('Error sending reset password email:', error.message)
+                alert('Failed to send reset password email: ' + error.message)
+            }
+        }
+        
+        function goBack() {
+            window.location.href = 'loginsignup.html';
+        }
+
+        // Make functions available globally
+        window.handleLogin = handleLogin;
+        window.forgotPassword = forgotPassword;
+        window.goBack = goBack;
+    </script>
+</body>
+</html>

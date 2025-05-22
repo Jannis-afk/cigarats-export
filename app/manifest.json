@@ -1,0 +1,24 @@
+{
+  "name": "CigaRats",
+  "short_name": "CigaRats",
+  "description": "Track your smokes with your friends",
+  "start_url": "/connectioncheck.html",
+  "id": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0A0633",
+  "theme_color": "#7C1896",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_192.png?v=1747451429642",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_512.png?v=1747451436106",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

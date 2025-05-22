@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CigaRats</title>
+  
+  <link rel="icon" type="image/png" href="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/Favicon_512.png?v=1747509759711">
+
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#4CAF50" />
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_192.png?v=1747451429642" />
+
+  <style>
+    body {
+        background-color: #000;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+        padding-bottom: 80px;
+    }
+    
+    /* Decorative background elements */
+    .bg-gradient-1 {
+        position: absolute;
+        top: 10%;
+        left: -100px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(138, 43, 226, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+        z-index: -1;
+        border-radius: 50%;
+    }
+    
+    .bg-gradient-2 {
+        position: absolute;
+        bottom: 10%;
+        right: -100px;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(30, 144, 255, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+        z-index: -1;
+        border-radius: 50%;
+    }
+    
+    .container {
+        width: 90%;
+        max-width: 500px;
+        padding: 20px;
+        margin-top: 20px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .logo-container {
+        margin: 30px 0;
+        text-align: center;
+        position: relative;
+    }
+    
+    .logo {
+        width: 120px;
+        height: 120px;
+        /* Placeholder for logo */
+        background-color: transparent;
+        margin: 0 auto;
+        position: relative;
+    }
+    
+    /* Logo glow effect */
+    .logo::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 140px;
+        height: 140px;
+        background: radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+        z-index: -1;
+        border-radius: 50%;
+    }
+    
+    .app-title {
+        font-size: 28px;
+        font-weight: bold;
+        margin: 10px 0;
+        text-align: center;
+        background: linear-gradient(135deg, #1E90FF, #8A2BE2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-fill-color: transparent;
+    }
+    
+    .app-subtitle {
+        font-size: 16px;
+        margin-bottom: 30px;
+        text-align: center;
+        opacity: 0.8;
+    }
+    
+    .device-message {
+        background-color: rgba(30, 30, 30, 0.5);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+        font-size: 18px;
+        line-height: 1.5;
+        border: 1px solid rgba(138, 43, 226, 0.3);
+        box-shadow: 0 0 20px rgba(138, 43, 226, 0.1);
+    }
+    
+    .instructions {
+        background-color: rgba(30, 30, 30, 0.5);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(30, 144, 255, 0.3);
+        box-shadow: 0 0 20px rgba(30, 144, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Decorative corner accent */
+    .instructions::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+        border-top-left-radius: 10px;
+    }
+    
+    .instructions::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(315deg, rgba(30, 144, 255, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+        border-bottom-right-radius: 10px;
+    }
+    
+    .instructions-title {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: white;
+        text-align: center;
+        position: relative;
+        padding-bottom: 10px;
+    }
+    
+    .instructions-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, #1E90FF, #8A2BE2);
+        border-radius: 3px;
+    }
+    
+    .step {
+        display: flex;
+        margin-bottom: 25px;
+        align-items: flex-start;
+        position: relative;
+    }
+    
+    .step-number {
+        background: linear-gradient(135deg, #1E90FF, #8A2BE2);
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 15px;
+        flex-shrink: 0;
+        box-shadow: 0 2px 10px rgba(138, 43, 226, 0.4);
+    }
+    
+    .step-content {
+        flex: 1;
+    }
+    
+    .step-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 16px;
+        color: #1E90FF;
+    }
+    
+    .step-description {
+        font-size: 14px;
+        line-height: 1.4;
+        color: #ccc;
+    }
+    
+    .image-container {
+        margin: 15px 0;
+        text-align: center;
+        position: relative;
+    }
+    
+    .instruction-image {
+        max-width: 100%;
+        border-radius: 8px;
+        border: 1px solid #444;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Decorative image frame */
+    .image-container::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #1E90FF, #8A2BE2);
+        z-index: -1;
+        opacity: 0.5;
+    }
+    
+    .footer {
+        margin-top: auto;
+        padding: 20px;
+        font-size: 12px;
+        opacity: 0.6;
+        text-align: center;
+        width: 100%;
+        position: relative;
+    }
+    
+    .footer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(30, 144, 255, 0.3), rgba(138, 43, 226, 0.3));
+    }
+    
+    /* Decorative dots */
+    .dot {
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1E90FF, #8A2BE2);
+        opacity: 0.3;
+    }
+    
+    .dot-1 {
+        width: 10px;
+        height: 10px;
+        top: 10%;
+        right: 10%;
+    }
+    
+    .dot-2 {
+        width: 15px;
+        height: 15px;
+        bottom: 20%;
+        left: 5%;
+    }
+    
+    .dot-3 {
+        width: 8px;
+        height: 8px;
+        top: 30%;
+        left: 8%;
+    }
+    
+    @media (max-width: 480px) {
+        .container {
+            width: 95%;
+            padding: 10px;
+        }
+        
+        .step {
+            flex-direction: column;
+        }
+        
+        .step-number {
+            margin-bottom: 10px;
+        }
+    }
+</style>
+</head>
+<body>
+<!-- Decorative background elements -->
+<div class="bg-gradient-1"></div>
+<div class="bg-gradient-2"></div>
+<div class="dot dot-1"></div>
+<div class="dot dot-2"></div>
+<div class="dot dot-3"></div>
+
+<div class="container">
+    <div class="logo-container">
+        <div class="logo">
+            <!-- Logo will go here -->
+          <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_192.png?v=1747451429642" alt="App Icon" width="120" height="120" />
+        </div>
+        <div class="app-title">CigaRats</div>
+        <div class="app-subtitle">Track your smokes with your friends</div>
+    </div>
+    
+    <div id="desktop-message" style="display: none;" class="device-message">
+        <p>This application is designed for mobile devices only.</p>
+        <p>Please open this website on your smartphone to install and use the app</p>
+        <p>or just scan the QR Code </p>
+        <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/CigaRatsQRcode.png?v=1747455573768" alt="App Icon" width="200" height="200" />
+    </div>
+    
+    <div id="android-instructions" style="display: none;" class="instructions">
+        <div class="instructions-title">Install on Android</div>
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <div class="step-title">Tap the Install Button</div>
+                <div class="step-description">
+                    The easiest way to install is to tap the "Install App" button at the bottom of the page.
+                </div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <div class="step-title">Alternative: Use browser menu</div>
+                <div class="step-description">
+                    You can also tap the three dots (⋮) in the top-right corner of your browser and select "Install app" or "Add to Home screen".
+                </div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <div class="step-title">Confirm installation</div>
+                <div class="step-description">
+                    Tap "Install" or "Add" in the prompt that appears. The app will be added to your home screen.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="ios-instructions" style="display: none;" class="instructions">
+        <div class="instructions-title">Install on iOS</div>
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <div class="step-title">Tap the share button</div>
+                <div class="step-description">
+                    Look for the share icon (a square with an arrow pointing up) at the bottom of your Safari browser.
+                </div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <div class="step-title">Scroll and select "Add to Home Screen"</div>
+                <div class="step-description">
+                    Scroll through the options in the share menu until you find "Add to Home Screen" and tap on it.
+                </div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <div class="step-title">Confirm and add to home screen</div>
+                <div class="step-description">
+                    You can edit the name if you want, then tap "Add" in the top-right corner. The app will be added to your home screen.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">© 2025 CigaRats</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Detect device type
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const isMobile = isAndroid || isIOS || /Mobile/i.test(navigator.userAgent);
+        
+        // Show appropriate instructions
+        if (!isMobile) {
+            // Desktop
+            document.getElementById('desktop-message').style.display = 'block';
+        } else if (isAndroid) {
+            // Android
+            document.getElementById('android-instructions').style.display = 'block';
+        } else if (isIOS) {
+            // iOS
+            document.getElementById('ios-instructions').style.display = 'block';
+        } else {
+            // Other mobile devices
+            document.getElementById('android-instructions').style.display = 'block';
+        }
+        
+        // Check if the app is already installed (running in standalone mode)
+        if (window.matchMedia('(display-mode: standalone)').matches || 
+            window.navigator.standalone === true) {
+            // App is already installed, redirect to the main app
+            window.location.href = 'connectioncheck.html';
+        }
+    });
+    
+    // Register service worker
+  
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(() => console.log('Service Worker registered'))
+            .catch(err => console.error('Service Worker registration failed:', err));
+    }
+</script>
+
+<!-- PWA Installation Prompt - Using the exact approach from the working example -->
+<script>
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the automatic mini-infobar
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Create and show your custom install button
+const installButton = document.createElement('button');
+installButton.textContent = '📱 Install App';
+
+installButton.style.cssText = `
+  position: fixed;
+  bottom: 20px;
+  left: 40%;
+  transform: translateX(-50%);
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #1E90FF, #8A2BE2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+  z-index: 1000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 50%;
+  text-align: center;
+`;
+
+document.body.appendChild(installButton);
+
+
+        installButton.addEventListener('click', () => {
+            installButton.remove(); // remove the button
+            deferredPrompt.prompt();
+
+            deferredPrompt.userChoice.then(choiceResult => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+            });
+        });
+    });
+</script>
+
+<!-- iOS Install Banner -->
+<script>
+    // Detect iOS Safari
+    const isIos = () => {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        return /iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent) && !/crios|fxios/.test(userAgent);
+    };
+
+    const isInStandaloneMode = () => 'standalone' in window.navigator && window.navigator.standalone;
+
+    // Show install guide if on iOS Safari and not installed
+if (isIos() && !isInStandaloneMode()) {
+    const banner = document.createElement('div');
+    banner.innerHTML = `
+        <div style="
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1E90FF, #8A2BE2);
+            color: white;
+            padding: 1em;
+            text-align: center;
+            font-family: sans-serif;
+            font-size: 1em;
+            z-index: 9999;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+        ">
+            📱 To install this app, tap the <strong>Share</strong> button and then <strong>"Add to Home Screen"</strong>
+            <button id="close-ios-banner" style="
+                margin-left: 1em;
+                background: white;
+                color: #8A2BE2;
+                border: none;
+                border-radius: 5px;
+                padding: 0.3em 0.7em;
+                font-weight: bold;
+                cursor: pointer;
+            ">×</button>
+        </div>
+    `;
+    document.body.appendChild(banner);
+
+    document.getElementById('close-ios-banner').addEventListener('click', () => {
+        banner.remove();
+    });
+}
+
+
+
+</script>
+
+</body>
+</html>

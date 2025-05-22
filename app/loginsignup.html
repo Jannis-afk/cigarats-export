@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login or Signup</title>
+    <style>
+        body {
+            background-color: #0A0633;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .logo-container {
+            margin-bottom: 60px;
+        }
+        
+        .logo {
+            width: 192px;
+            height: 192px;
+            /* Placeholder for logo */
+            background-color: transparent;
+        }
+        
+        .app-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .app-subtitle {
+            font-size: 16px;
+            margin-bottom: 40px;
+            text-align: center;
+            opacity: 0.8;
+        }
+        
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 80%;
+            max-width: 300px;
+        }
+        
+        .button {
+            padding: 15px 0;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .login-button {
+            background: linear-gradient(135deg, #1E90FF, #8A2BE2);
+            color: white;
+        }
+        
+        .signup-button {
+            background-color: transparent;
+            border: 2px solid #8A2BE2;
+            color: white;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+        }
+        
+        .signup-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.2);
+            background-color: rgba(138, 43, 226, 0.1);
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <div class="logo">
+            <!-- Logo will go here -->
+            <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_192.png?v=1747451429642" alt="App Icon" width="192" height="192" />
+        </div>
+    </div>
+    
+    <div class="app-title">CigaRats</div>
+    <div class="app-subtitle">Track your smokes with your friends</div>
+    
+    <div class="buttons-container">
+        <button class="button login-button" onclick="navigateToLogin()">Login</button>
+        <button class="button signup-button" onclick="navigateToSignup()">Sign Up</button>
+    </div>
+    
+    <div class="footer">© 2025 CigaRats</div>
+    
+    <script>
+        function navigateToLogin() {
+            // Replace with actual login page navigation
+            console.log('Navigating to login page');
+            window.location.href = 'login.html';
+        }
+        
+        function navigateToSignup() {
+            // Replace with actual signup page navigation
+            console.log('Navigating to signup page');
+            window.location.href = 'signup.html';
+        }
+    </script>
+</body>
+</html>
