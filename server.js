@@ -5,6 +5,7 @@ const crypto = require("crypto")
 
 const app = express()
 const PORT = process.env.PORT || 3000
+const startTime = Date.now(); // Record when server script starts
 
 app.use(cors()) // ✅ Enable CORS before other middleware
 app.use(express.static(path.join(__dirname, "app")))
@@ -62,8 +63,10 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "app", "index.html"))
 })
 
-app.use(express.static(__dirname + '/app/public'));
+//app.use(express.static(__dirname + '/app/public'));
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`)
+  const bootTime = Date.now() - startTime;
+  console.log(`🚀 Server started in ${bootTime}ms on port ${PORT}`);
 })
