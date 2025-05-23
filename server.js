@@ -7,10 +7,10 @@ const app = express()
 const PORT = process.env.PORT || 3000
 const startTime = Date.now(); // Record when server script starts
 
+app.use(cors());
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors()) // ✅ Enable CORS before other middleware
-app.use(express.static(path.join(__dirname, "app")))
-app.use(express.json()) // Add JSON body parser for API endpoints
+app.use(express.static(path.join(__dirname, 'app')));
 
 // ImageKit authentication endpoint
 app.get("/auth-imagekit", (req, res) => {
