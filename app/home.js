@@ -13,16 +13,37 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastCigaretteTime = null
 
     // Function to show toast messages
-    function showToast(message, type = "success") {
-      const toastContainer = document.createElement("div")
-      toastContainer.className = `toast ${type}`
-      //toastContainer.textContent = message
-      document.body.appendChild(toastContainer)
-
-      setTimeout(() => {
-        document.body.removeChild(toastContainer)
-      }, 3000)
-    }
+    
+        function showToast(message, type = 'success') {
+            // Check if toast container exists
+            let toastContainer = document.getElementById('toast-container');
+            
+            // Create toast container if it doesn't exist
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast-${type}`;
+            toast.textContent = message;
+            
+            // Add toast to container
+            toastContainer.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toastContainer.contains(toast)) {
+                        toastContainer.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
 
     // Function to show cigarette details in modal
     function showCigaretteDetails(cigarette, brand, isGroupCigarette = false) {
