@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function showToast(message, type = "success") {
       const toastContainer = document.createElement("div")
       toastContainer.className = `toast ${type}`
-      toastContainer.textContent = message
+      //toastContainer.textContent = message
       document.body.appendChild(toastContainer)
 
       setTimeout(() => {
@@ -267,8 +267,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Load profile stats
         await loadProfileStats()
 
-        // Load cigarette history
-        await loadCigaretteHistory()
+        // Note: We're removing the loadCigaretteHistory call here
+        // It will be loaded on demand when the history tab is clicked
       } catch (error) {
         console.error("Error loading home screen data:", error)
         showError("Failed to load data. Please try again later.")
@@ -349,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
           listItem.innerHTML = `
   <div class="recent-info" style="flex: 1; min-width: 0;">
       <div class="recent-brand">${profile.cigarette_brand || "Cigarette"}</div>
-      <div class="recent-meta" style="word-wrap: break-word;">${relativeDate}, ${timeString} • ${cigarette.notes || "Solo"}</div>
+      <div class="recent-meta" style="word-wrap: break-word;">${relativeDate}, ${timeString} • ${cigarette.notes || ""}</div>
   </div>
   ${iconHtml}
 `
@@ -672,7 +672,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           // Create a section header for the cigarette list
           const cigListHeader = document.createElement("h3")
-          cigListHeader.textContent = "Last 10 Cigarettes by Group Members"
+          cigListHeader.textContent = "Last Cigarettes"
           cigListHeader.style.marginTop = "30px"
           cigListHeader.style.marginBottom = "15px"
           document.getElementById("activity-tab").appendChild(cigListHeader)
@@ -843,19 +843,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Get all cigarette logs with a limit of 20
         const logs = await window.dataService.getUserCigaretteLogs(currentUserId, 20)
 
-        // Group by date
-        const logsByDate = {}
-        logs.forEach((log) => {
-          const date = new Date(log.created_at)
-          const dateString = date.toISOString().split("T")[0]
-
-          if (!logsByDate[dateString]) {
-            logsByDate[dateString] = []
-          }
-
-          logsByDate[dateString].push(log)
-        })
-
         // Get user profile for cigarette brand
         const profile = await window.dataService.getUserProfile(currentUserId)
 
@@ -864,85 +851,54 @@ document.addEventListener("DOMContentLoaded", () => {
         historyTab.innerHTML = ""
 
         // Add cigarettes to history
-        const dateKeys = Object.keys(logsByDate).sort().reverse()
+        logs.forEach((log) => {
+          const date = new Date(log.created_at)
+          const relativeDate = window.dataService.formatRelativeDate(date)
+          const timeString = window.dataService.formatDate(date)
 
-        // Limit to last 7 days
-        const recentDates = dateKeys.slice(0, 7)
+          // Create icon element - either photo or emoji
+          let iconHtml = "🚬"
 
-        recentDates.forEach((dateString) => {
-          const date = new Date(dateString)
-          const today = new Date()
-          const yesterday = new Date()
-          yesterday.setDate(yesterday.getDate() - 1)
-
-          let dateLabel = ""
-          if (date.toDateString() === today.toDateString()) {
-            dateLabel = "Today"
-          } else if (date.toDateString() === yesterday.toDateString()) {
-            dateLabel = "Yesterday"
-          } else {
-            dateLabel = date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
+          // If there's a photo URL, use it instead of the emoji
+          if (log.pic_url) {
+            iconHtml = `
+          <div style="width: 40px; height: 40px; min-width: 40px; overflow: hidden; border-radius: 5px;">
+            <img src="${log.pic_url}" 
+                 alt="Cigarette Photo" 
+                 style="width: 100%; height: 100%; object-fit: cover;"
+                 onerror="this.parentNode.innerHTML='🚬'">
+          </div>
+        `
           }
 
-          const dateSection = document.createElement("div")
-          dateSection.style.marginBottom = "20px"
-          dateSection.innerHTML = `<div style="font-weight: bold; margin-bottom: 10px;">${dateLabel}</div>`
+          const item = document.createElement("div")
+          item.className = "recent-item"
+          item.style.alignItems = "flex-start"
+          item.style.marginBottom = "10px"
+          item.innerHTML = `
+        <div class="recent-info" style="flex: 1; min-width: 0;">
+            <div class="recent-brand">${profile.cigarette_brand || "Cigarette"}</div>
+            <div class="recent-meta" style="word-wrap: break-word;">${relativeDate}, ${timeString} • ${log.notes || ""}</div>
+        </div>
+        <div style="flex-shrink: 0;">${iconHtml}</div>
+      `
 
-          // Add cigarettes for this date
-          logsByDate[dateString].forEach((log) => {
-            const time = new Date(log.created_at).toLocaleString("en-US", {
-              hour: "numeric",
-              minute: "numeric",
-              hour12: true,
-            })
-
-            // Create icon element - either photo or emoji
-            let iconHtml = "🚬"
-
-            // If there's a photo URL, use it instead of the emoji
-            if (log.pic_url) {
-              iconHtml = `
-                <div style="width: 40px; height: 40px; min-width: 40px; overflow: hidden; border-radius: 5px;">
-                  <img src="${log.pic_url}" 
-                       alt="Cigarette Photo" 
-                       style="width: 100%; height: 100%; object-fit: cover;"
-                       onerror="this.parentNode.innerHTML='🚬'">
-                </div>
-              `
-            }
-
-            const item = document.createElement("div")
-            item.className = "group-item"
-            item.style.alignItems = "flex-start" // Align items to the top
-            item.innerHTML = `
-  <div class="group-info" style="flex: 1; min-width: 0;">
-      <div class="group-name">${profile.cigarette_brand || "Cigarette"}</div>
-      <div class="group-meta" style="word-wrap: break-word;">${time} • ${log.notes || "Solo"}</div>
-  </div>
-  <div style="flex-shrink: 0;">${iconHtml}</div>
-`
-
-            dateSection.appendChild(item)
-          })
-
-          historyTab.appendChild(dateSection)
+          historyTab.appendChild(item)
         })
 
-        // Add load more button if there are more dates
-        if (dateKeys.length > recentDates.length) {
+        // Add load more button if there are exactly 20 logs (indicating there might be more)
+        if (logs.length === 20) {
           const loadMoreBtn = document.createElement("button")
           loadMoreBtn.className = "btn btn-block"
           loadMoreBtn.style.marginTop = "20px"
           loadMoreBtn.textContent = "Load More"
-          loadMoreBtn.addEventListener("click", () =>
-            loadMoreHistory(dateKeys, logsByDate, profile, recentDates.length),
-          )
+          loadMoreBtn.addEventListener("click", () => loadMoreHistorySimple(20))
 
           historyTab.appendChild(loadMoreBtn)
         }
 
         // If no logs, show message
-        if (dateKeys.length === 0) {
+        if (logs.length === 0) {
           const message = document.createElement("div")
           message.style.textAlign = "center"
           message.style.padding = "20px"
@@ -951,17 +907,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
           historyTab.appendChild(message)
         }
+
+        historyTab.setAttribute("data-loaded", "true")
       } catch (error) {
         console.error("Error loading cigarette history:", error)
         showError("Failed to load cigarette history. Please try again later.")
       }
     }
 
-    // Load more history
-    function loadMoreHistory(allDates, logsByDate, profile, startIndex) {
+    // Load more history (simplified version)
+    async function loadMoreHistorySimple(currentCount) {
       try {
-        // Get next 7 days
-        const nextDates = allDates.slice(startIndex, startIndex + 7)
+        // Get next batch of cigarette logs
+        const logs = await window.dataService.getUserCigaretteLogs(currentUserId, currentCount + 20)
+
+        // Get only the new logs (skip the ones we already have)
+        const newLogs = logs.slice(currentCount)
+
+        // Get user profile for cigarette brand
+        const profile = await window.dataService.getUserProfile(currentUserId)
 
         // Get history tab
         const historyTab = document.getElementById("history-tab")
@@ -972,64 +936,49 @@ document.addEventListener("DOMContentLoaded", () => {
           historyTab.removeChild(loadMoreBtn)
         }
 
-        // Add cigarettes to history
-        nextDates.forEach((dateString) => {
-          const date = new Date(dateString)
-          const dateLabel = date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
+        // Add new cigarettes to history
+        newLogs.forEach((log) => {
+          const date = new Date(log.created_at)
+          const relativeDate = window.dataService.formatRelativeDate(date)
+          const timeString = window.dataService.formatDate(date)
 
-          const dateSection = document.createElement("div")
-          dateSection.style.marginBottom = "20px"
-          dateSection.innerHTML = `<div style="font-weight: bold; margin-bottom: 10px;">${dateLabel}</div>`
+          // Create icon element - either photo or emoji
+          let iconHtml = "🚬"
 
-          // Add cigarettes for this date
-          logsByDate[dateString].forEach((log) => {
-            const time = new Date(log.created_at).toLocaleString("en-US", {
-              hour: "numeric",
-              minute: "numeric",
-              hour12: true,
-            })
+          // If there's a photo URL, use it instead of the emoji
+          if (log.pic_url) {
+            iconHtml = `
+          <div style="width: 40px; height: 40px; min-width: 40px; overflow: hidden; border-radius: 5px;">
+            <img src="${log.pic_url}" 
+                 alt="Cigarette Photo" 
+                 style="width: 100%; height: 100%; object-fit: cover;"
+                 onerror="this.parentNode.innerHTML='🚬'">
+          </div>
+        `
+          }
 
-            // Create icon element - either photo or emoji
-            let iconHtml = "🚬"
+          const item = document.createElement("div")
+          item.className = "recent-item"
+          item.style.alignItems = "flex-start"
+          item.style.marginBottom = "10px"
+          item.innerHTML = `
+        <div class="recent-info" style="flex: 1; min-width: 0;">
+            <div class="recent-brand">${profile.cigarette_brand || "Cigarette"}</div>
+            <div class="recent-meta" style="word-wrap: break-word;">${relativeDate}, ${timeString} • ${log.notes || ""}</div>
+        </div>
+        <div style="flex-shrink: 0;">${iconHtml}</div>
+      `
 
-            // If there's a photo URL, use it instead of the emoji
-            if (log.pic_url) {
-              iconHtml = `
-                <div style="width: 40px; height: 40px; min-width: 40px; overflow: hidden; border-radius: 5px;">
-                  <img src="${log.pic_url}" 
-                       alt="Cigarette Photo" 
-                       style="width: 100%; height: 100%; object-fit: cover;"
-                       onerror="this.parentNode.innerHTML='🚬'">
-                </div>
-              `
-            }
-
-            const item = document.createElement("div")
-            item.className = "group-item"
-            item.style.alignItems = "flex-start" // Align items to the top
-            item.innerHTML = `
-  <div class="group-info" style="flex: 1; min-width: 0;">
-      <div class="group-name">${profile.cigarette_brand || "Cigarette"}</div>
-      <div class="group-meta" style="word-wrap: break-word;">${time} • ${log.notes || "Solo"}</div>
-  </div>
-  <div style="flex-shrink: 0;">${iconHtml}</div>
-`
-
-            dateSection.appendChild(item)
-          })
-
-          historyTab.appendChild(dateSection)
+          historyTab.appendChild(item)
         })
 
-        // Add load more button if there are more dates
-        if (allDates.length > startIndex + nextDates.length) {
+        // Add load more button if there are more logs
+        if (logs.length === currentCount + 20) {
           const newLoadMoreBtn = document.createElement("button")
           newLoadMoreBtn.className = "btn btn-block"
           newLoadMoreBtn.style.marginTop = "20px"
           newLoadMoreBtn.textContent = "Load More"
-          newLoadMoreBtn.addEventListener("click", () =>
-            loadMoreHistory(allDates, logsByDate, profile, startIndex + nextDates.length),
-          )
+          newLoadMoreBtn.addEventListener("click", () => loadMoreHistorySimple(currentCount + 20))
 
           historyTab.appendChild(newLoadMoreBtn)
         }
@@ -1256,6 +1205,17 @@ document.addEventListener("DOMContentLoaded", () => {
           showToast("Failed to log out. Please try again later.", "error")
         }
       })
+
+      // Add event listener for the history tab
+      const historyTabButton = document.querySelectorAll("#profile-screen .tab")[1]
+      if (historyTabButton) {
+        historyTabButton.addEventListener("click", () => {
+          const historyTab = document.getElementById("history-tab")
+          if (historyTab && historyTab.getAttribute("data-loaded") !== "true") {
+            loadCigaretteHistory()
+          }
+        })
+      }
     }
 
     // Update smoke-free duration
