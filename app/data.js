@@ -1,93 +1,93 @@
 // Initialize window.dataService if it doesn't exist
-window.dataService = window.dataService || {};
+window.dataService = window.dataService || {}
 
 // ===== PROFILE FUNCTIONS =====
 
-window.dataService.getUserProfile = async function(userId) {
-  const { data, error } = await window.supabase.from("profiles").select("*, created_at").eq("id", userId).single();
-  if (error) throw error;
-  return data;
-};
+window.dataService.getUserProfile = async (userId) => {
+  const { data, error } = await window.supabase.from("profiles").select("*, created_at").eq("id", userId).single()
+  if (error) throw error
+  return data
+}
 
-window.dataService.getUsername = async function(userId) {
-  const { data, error } = await window.supabase.from("profiles").select("username").eq("id", userId).single();
-  if (error) throw error;
-  return data.username;
-};
+window.dataService.getUsername = async (userId) => {
+  const { data, error } = await window.supabase.from("profiles").select("username").eq("id", userId).single()
+  if (error) throw error
+  return data.username
+}
 
-window.dataService.getEmail = async function(userId) {
-  const { data, error } = await window.supabase.from("profiles").select("email").eq("id", userId).single();
-  if (error) throw error;
-  return data.email;
-};
+window.dataService.getEmail = async (userId) => {
+  const { data, error } = await window.supabase.from("profiles").select("email").eq("id", userId).single()
+  if (error) throw error
+  return data.email
+}
 
-window.dataService.getCigaretteBrand = async function(userId) {
-  const { data, error } = await window.supabase.from("profiles").select("cigarette_brand").eq("id", userId).single();
-  if (error) throw error;
-  return data.cigarette_brand;
-};
+window.dataService.getCigaretteBrand = async (userId) => {
+  const { data, error } = await window.supabase.from("profiles").select("cigarette_brand").eq("id", userId).single()
+  if (error) throw error
+  return data.cigarette_brand
+}
 
-window.dataService.getPricePerPack = async function(userId) {
-  const { data, error } = await window.supabase.from("profiles").select("price_per_pack").eq("id", userId).single();
-  if (error) throw error;
-  return data.price_per_pack;
-};
+window.dataService.getPricePerPack = async (userId) => {
+  const { data, error } = await window.supabase.from("profiles").select("price_per_pack").eq("id", userId).single()
+  if (error) throw error
+  return data.price_per_pack
+}
 
-window.dataService.getCigsPerPack = async function(userId) {
-  const { data, error } = await window.supabase.from("profiles").select("cigs_per_pack").eq("id", userId).single();
-  if (error) throw error;
-  return data.cigs_per_pack;
-};
+window.dataService.getCigsPerPack = async (userId) => {
+  const { data, error } = await window.supabase.from("profiles").select("cigs_per_pack").eq("id", userId).single()
+  if (error) throw error
+  return data.cigs_per_pack
+}
 
-window.dataService.setUsername = async function(userId, newUsername) {
+window.dataService.setUsername = async (userId, newUsername) => {
   // Update auth user
   const { error: authError } = await window.supabase.auth.updateUser({
     data: { username: newUsername },
-  });
-  if (authError) throw authError;
+  })
+  if (authError) throw authError
 
   // Update profile
-  const { error: profileError } = await window.supabase.from("profiles").update({ username: newUsername }).eq("id", userId);
-  if (profileError) throw profileError;
-};
+  const { error: profileError } = await window.supabase
+    .from("profiles")
+    .update({ username: newUsername })
+    .eq("id", userId)
+  if (profileError) throw profileError
+}
 
-window.dataService.setEmail = async function(userId, newEmail) {
+window.dataService.setEmail = async (userId, newEmail) => {
   // Update auth user
   const { error: authError } = await window.supabase.auth.updateUser({
     email: newEmail,
-  });
-  if (authError) throw authError;
+  })
+  if (authError) throw authError
 
   // Update profile
-  const { error: profileError } = await window.supabase.from("profiles").update({ email: newEmail }).eq("id", userId);
-  if (profileError) throw profileError;
-};
+  const { error: profileError } = await window.supabase.from("profiles").update({ email: newEmail }).eq("id", userId)
+  if (profileError) throw profileError
+}
 
-window.dataService.setCigaretteBrand = async function(userId, brand) {
-  const { error } = await window.supabase.from("profiles").update({ cigarette_brand: brand }).eq("id", userId);
-  if (error) throw error;
-};
+window.dataService.setCigaretteBrand = async (userId, brand) => {
+  const { error } = await window.supabase.from("profiles").update({ cigarette_brand: brand }).eq("id", userId)
+  if (error) throw error
+}
 
-window.dataService.setPricePerPack = async function(userId, price) {
+window.dataService.setPricePerPack = async (userId, price) => {
   // Remove dollar sign and parse to float
-  const parsedPrice = parseFloat(price.toString().replace(/[^0-9.]/g, ''));
-  
+  const parsedPrice = Number.parseFloat(price.toString().replace(/[^0-9.]/g, ""))
+
   // Round to nearest whole number
-  const roundedPrice = Math.round(parsedPrice);
+  const roundedPrice = Math.round(parsedPrice)
 
   // Update in Supabase
-  const { error } = await window.supabase
-    .from("profiles")
-    .update({ price_per_pack: roundedPrice })
-    .eq("id", userId);
+  const { error } = await window.supabase.from("profiles").update({ price_per_pack: roundedPrice }).eq("id", userId)
 
-  if (error) throw error;
-};
+  if (error) throw error
+}
 
-window.dataService.setCigsPerPack = async function(userId, count) {
-  const { error } = await window.supabase.from("profiles").update({ cigs_per_pack: count }).eq("id", userId);
-  if (error) throw error;
-};
+window.dataService.setCigsPerPack = async (userId, count) => {
+  const { error } = await window.supabase.from("profiles").update({ cigs_per_pack: count }).eq("id", userId)
+  if (error) throw error
+}
 
 // ===== CIGARETTE LOG FUNCTIONS =====
 
@@ -152,131 +152,131 @@ window.dataService.getLastCigaretteTime = async (userId) => {
   }
 }
 
-window.dataService.getLastCigarettes = async function(userId, count) {
+window.dataService.getLastCigarettes = async (userId, count) => {
   const { data, error } = await window.supabase
     .from("cigarette_logs")
     .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
-    .limit(count);
+    .limit(count)
 
-  if (error) throw error;
-  return data;
-};
+  if (error) throw error
+  return data
+}
 
-window.dataService.getDailyCigarettes = async function(userId, date) {
-  const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
+window.dataService.getDailyCigarettes = async (userId, date) => {
+  const startOfDay = new Date(date)
+  startOfDay.setHours(0, 0, 0, 0)
 
-  const endOfDay = new Date(date);
-  endOfDay.setHours(23, 59, 59, 999);
+  const endOfDay = new Date(date)
+  endOfDay.setHours(23, 59, 59, 999)
 
   const { data, error } = await window.supabase
     .from("cigarette_logs")
     .select("*", { count: "exact" })
     .eq("user_id", userId)
     .gte("created_at", startOfDay.toISOString())
-    .lte("created_at", endOfDay.toISOString());
+    .lte("created_at", endOfDay.toISOString())
 
-  if (error) throw error;
-  return data.length;
-};
+  if (error) throw error
+  return data.length
+}
 
-window.dataService.getWeeklyCigarettes = async function(userId, startDate) {
-  const startOfWeek = new Date(startDate);
-  startOfWeek.setHours(0, 0, 0, 0);
+window.dataService.getWeeklyCigarettes = async (userId, startDate) => {
+  const startOfWeek = new Date(startDate)
+  startOfWeek.setHours(0, 0, 0, 0)
 
-  const endOfWeek = new Date(startDate);
-  endOfWeek.setDate(endOfWeek.getDate() + 7);
-  endOfWeek.setHours(23, 59, 59, 999);
+  const endOfWeek = new Date(startDate)
+  endOfWeek.setDate(endOfWeek.getDate() + 7)
+  endOfWeek.setHours(23, 59, 59, 999)
 
   const { data, error } = await window.supabase
     .from("cigarette_logs")
     .select("*", { count: "exact" })
     .eq("user_id", userId)
     .gte("created_at", startOfWeek.toISOString())
-    .lte("created_at", endOfWeek.toISOString());
+    .lte("created_at", endOfWeek.toISOString())
 
-  if (error) throw error;
-  return data.length;
-};
+  if (error) throw error
+  return data.length
+}
 
-window.dataService.getMoneySpent = async function(userId, startDate, endDate) {
+window.dataService.getMoneySpent = async (userId, startDate, endDate) => {
   const { data: logs, error: logsError } = await window.supabase
     .from("cigarette_logs")
     .select("*")
     .eq("user_id", userId)
     .gte("created_at", startDate.toISOString())
-    .lte("created_at", endDate.toISOString());
+    .lte("created_at", endDate.toISOString())
 
-  if (logsError) throw logsError;
+  if (logsError) throw logsError
 
   const { data: profile, error: profileError } = await window.supabase
     .from("profiles")
     .select("price_per_pack, cigs_per_pack")
     .eq("id", userId)
-    .single();
+    .single()
 
-  if (profileError) throw profileError;
+  if (profileError) throw profileError
 
-  const cigarettesCount = logs.length;
-  const packs = cigarettesCount / profile.cigs_per_pack;
-  return (packs * profile.price_per_pack).toFixed(2);
-};
+  const cigarettesCount = logs.length
+  const packs = cigarettesCount / profile.cigs_per_pack
+  return (packs * profile.price_per_pack).toFixed(2)
+}
 
-window.dataService.getTimeSpentSmoking = async function(userId, startDate, endDate) {
+window.dataService.getTimeSpentSmoking = async (userId, startDate, endDate) => {
   const { data, error } = await window.supabase
     .from("cigarette_logs")
     .select("*")
     .eq("user_id", userId)
     .gte("created_at", startDate.toISOString())
-    .lte("created_at", endDate.toISOString());
+    .lte("created_at", endDate.toISOString())
 
-  if (error) throw error;
+  if (error) throw error
 
-  const minutes = data.length * 5; // Assuming 5 minutes per cigarette
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  return `${hours}h ${remainingMinutes}m`;
-};
+  const minutes = data.length * 5 // Assuming 5 minutes per cigarette
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+  return `${hours}h ${remainingMinutes}m`
+}
 
-window.dataService.getDayWithMostCigarettes = async function(userId) {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+window.dataService.getDayWithMostCigarettes = async (userId) => {
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
   const { data, error } = await window.supabase
     .from("cigarette_logs")
     .select("created_at")
     .eq("user_id", userId)
     .gte("created_at", thirtyDaysAgo.toISOString())
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
 
-  if (error) throw error;
+  if (error) throw error
 
   // Group cigarettes by day
-  const cigarettesByDay = {};
+  const cigarettesByDay = {}
   data.forEach((log) => {
-    const date = new Date(log.created_at).toISOString().split("T")[0];
-    cigarettesByDay[date] = (cigarettesByDay[date] || 0) + 1;
-  });
+    const date = new Date(log.created_at).toISOString().split("T")[0]
+    cigarettesByDay[date] = (cigarettesByDay[date] || 0) + 1
+  })
 
   // Find day with most cigarettes
-  let maxDay = null;
-  let maxCount = 0;
+  let maxDay = null
+  let maxCount = 0
 
   for (const [day, count] of Object.entries(cigarettesByDay)) {
     if (count > maxCount) {
-      maxCount = count;
-      maxDay = day;
+      maxCount = count
+      maxDay = day
     }
   }
 
-  return { date: maxDay, count: maxCount };
-};
+  return { date: maxDay, count: maxCount }
+}
 
-window.dataService.getMostSmokedTimeFrame = async function(userId) {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+window.dataService.getMostSmokedTimeFrame = async (userId) => {
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
   const { data, error } = await window.supabase
     .from("cigarette_logs")
@@ -314,7 +314,7 @@ window.dataService.getMostSmokedTimeFrame = async function(userId) {
 
 // ===== GROUP FUNCTIONS =====
 
-window.dataService.getGroupMembers = async function(groupId) {
+window.dataService.getGroupMembers = async (groupId) => {
   const { data, error } = await window.supabase
     .from("group_members")
     .select(`
@@ -329,146 +329,150 @@ window.dataService.getGroupMembers = async function(groupId) {
         avatar_url
       )
     `)
-    .eq("group_id", groupId);
+    .eq("group_id", groupId)
 
-  if (error) throw error;
-  return data.map((item) => item.profiles);
-};
+  if (error) throw error
+  return data.map((item) => item.profiles)
+}
 
-window.dataService.createGroup = async function(userId, name, description) {
-  let inviteCode;
-  let isUnique = false;
+window.dataService.createGroup = async (userId, name, description) => {
+  let inviteCode
+  let isUnique = false
 
   while (!isUnique) {
-    inviteCode = Array.from({ length: 6 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join("");
-    const { data, error } = await window.supabase.from("groups").select("id").eq("invite_code", inviteCode).single();
-    if (error && error.code === "PGRST116") isUnique = true;
+    inviteCode = Array.from({ length: 6 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join("")
+    const { data, error } = await window.supabase.from("groups").select("id").eq("invite_code", inviteCode).single()
+    if (error && error.code === "PGRST116") isUnique = true
   }
 
   const { data, error } = await window.supabase
     .from("groups")
     .insert([{ name, description, created_by: userId, invite_code: inviteCode }])
     .select()
-    .single();
+    .single()
 
-  if (error) throw error;
+  if (error) throw error
 
-  const { error: memberError } = await window.supabase.from("group_members").insert([{ group_id: data.id, user_id: userId }]);
-  if (memberError) throw memberError;
+  const { error: memberError } = await window.supabase
+    .from("group_members")
+    .insert([{ group_id: data.id, user_id: userId }])
+  if (memberError) throw memberError
 
-  return data;
-};
+  return data
+}
 
-window.dataService.getUserCigaretteLogs = async function(userId, limit) {
+window.dataService.getUserCigaretteLogs = async (userId, limit) => {
   const { data, error } = await window.supabase
     .from("cigarette_logs")
     .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
-    .limit(limit || 20);
+    .limit(limit || 20)
 
-  if (error) throw error;
-  return data;
-};
+  if (error) throw error
+  return data
+}
 
-window.dataService.getGroupCigaretteLogs = async function(groupId) {
+window.dataService.getGroupCigaretteLogs = async (groupId) => {
   const { data, error } = await window.supabase
     .from("cigarette_logs")
     .select(`*, profiles (username)`)
     .eq("group_id", groupId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
 
-  if (error) throw error;
-  return data;
-};
+  if (error) throw error
+  return data
+}
 
-window.dataService.getTodayCigaretteCount = async function(userId) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const { data, error } = await window.supabase
-    .from("cigarette_logs")
-    .select("*", { count: "exact" })
-    .eq("user_id", userId)
-    .gte("created_at", today.toISOString());
-
-  if (error) throw error;
-  return data.length;
-};
-
-window.dataService.getWeekCigaretteCount = async function(userId) {
-  const weekStart = new Date();
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-  weekStart.setHours(0, 0, 0, 0);
+window.dataService.getTodayCigaretteCount = async (userId) => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   const { data, error } = await window.supabase
     .from("cigarette_logs")
     .select("*", { count: "exact" })
     .eq("user_id", userId)
-    .gte("created_at", weekStart.toISOString());
+    .gte("created_at", today.toISOString())
 
-  if (error) throw error;
-  return data.length;
-};
+  if (error) throw error
+  return data.length
+}
 
-window.dataService.calculateMoneySpent = function(cigaretteCount, pricePerPack, cigsPerPack) {
-  const packs = cigaretteCount / cigsPerPack;
-  return (packs * pricePerPack).toFixed(2);
-};
+window.dataService.getWeekCigaretteCount = async (userId) => {
+  const weekStart = new Date()
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay())
+  weekStart.setHours(0, 0, 0, 0)
 
-window.dataService.calculateTimeSpent = function(cigaretteCount) {
-  const minutes = cigaretteCount * 5;
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  return `${hours}h ${remainingMinutes}m`;
-};
+  const { data, error } = await window.supabase
+    .from("cigarette_logs")
+    .select("*", { count: "exact" })
+    .eq("user_id", userId)
+    .gte("created_at", weekStart.toISOString())
 
-window.dataService.getGroupById = async function(groupId) {
-  const { data, error } = await window.supabase.from("groups").select("*").eq("id", groupId).single();
-  if (error) throw error;
-  return data;
-};
+  if (error) throw error
+  return data.length
+}
 
-window.dataService.joinGroupWithCode = async function(userId, inviteCode) {
+window.dataService.calculateMoneySpent = (cigaretteCount, pricePerPack, cigsPerPack) => {
+  const packs = cigaretteCount / cigsPerPack
+  return (packs * pricePerPack).toFixed(2)
+}
+
+window.dataService.calculateTimeSpent = (cigaretteCount) => {
+  const minutes = cigaretteCount * 5
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+  return `${hours}h ${remainingMinutes}m`
+}
+
+window.dataService.getGroupById = async (groupId) => {
+  const { data, error } = await window.supabase.from("groups").select("*").eq("id", groupId).single()
+  if (error) throw error
+  return data
+}
+
+window.dataService.joinGroupWithCode = async (userId, inviteCode) => {
   const { data: group, error: groupError } = await window.supabase
     .from("groups")
     .select("id")
     .eq("invite_code", inviteCode)
-    .single();
+    .single()
 
-  if (groupError) throw groupError;
+  if (groupError) throw groupError
 
   const { data: existingMember, error: memberCheckError } = await window.supabase
     .from("group_members")
     .select("id")
     .eq("group_id", group.id)
     .eq("user_id", userId)
-    .single();
+    .single()
 
-  if (!memberCheckError && existingMember) throw new Error("You are already a member of this group");
+  if (!memberCheckError && existingMember) throw new Error("You are already a member of this group")
 
-  const { error: joinError } = await window.supabase.from("group_members").insert([{ group_id: group.id, user_id: userId }]);
-  if (joinError) throw joinError;
+  const { error: joinError } = await window.supabase
+    .from("group_members")
+    .insert([{ group_id: group.id, user_id: userId }])
+  if (joinError) throw joinError
 
-  return group.id;
-};
+  return group.id
+}
 
-window.dataService.leaveGroup = async function(userId, groupId) {
-  const { error } = await window.supabase.from("group_members").delete().eq("group_id", groupId).eq("user_id", userId);
-  if (error) throw error;
-};
+window.dataService.leaveGroup = async (userId, groupId) => {
+  const { error } = await window.supabase.from("group_members").delete().eq("group_id", groupId).eq("user_id", userId)
+  if (error) throw error
+}
 
-window.dataService.getGroupScoreboard = async function(groupId) {
+window.dataService.getGroupScoreboard = async (groupId) => {
   const { data: members, error: membersError } = await window.supabase
     .from("group_members")
     .select(`user_id, profiles (id, username)`)
-    .eq("group_id", groupId);
+    .eq("group_id", groupId)
 
-  if (membersError) throw membersError;
+  if (membersError) throw membersError
 
-  const weekStart = new Date();
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-  weekStart.setHours(0, 0, 0, 0);
+  const weekStart = new Date()
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay())
+  weekStart.setHours(0, 0, 0, 0)
 
   const scoreboard = await Promise.all(
     members.map(async (member) => {
@@ -476,166 +480,185 @@ window.dataService.getGroupScoreboard = async function(groupId) {
         .from("cigarette_logs")
         .select("*", { count: "exact" })
         .eq("user_id", member.user_id)
-        .gte("created_at", weekStart.toISOString());
+        .gte("created_at", weekStart.toISOString())
 
-      if (error) throw error;
+      if (error) throw error
 
       return {
         userId: member.user_id,
         username: member.profiles.username,
         count: data.length,
-      };
-    })
-  );
+      }
+    }),
+  )
 
-  return scoreboard.sort((a, b) => a.count - b.count);
-};
+  return scoreboard.sort((a, b) => a.count - b.count)
+}
 
-window.dataService.getGroupActivity = async function(groupId) {
+window.dataService.getGroupActivity = async (groupId) => {
   const { data: members, error: membersError } = await window.supabase
     .from("group_members")
     .select("user_id")
-    .eq("group_id", groupId);
+    .eq("group_id", groupId)
 
-  if (membersError) throw membersError;
+  if (membersError) throw membersError
 
-  const weekStart = new Date();
-  weekStart.setDate(weekStart.getDate() - 6);
-  weekStart.setHours(0, 0, 0, 0);
+  const weekStart = new Date()
+  weekStart.setDate(weekStart.getDate() - 6)
+  weekStart.setHours(0, 0, 0, 0)
 
   const { data: logs, error: logsError } = await window.supabase
     .from("cigarette_logs")
     .select("created_at")
-    .in("user_id", members.map(m => m.user_id))
+    .in(
+      "user_id",
+      members.map((m) => m.user_id),
+    )
     .gte("created_at", weekStart.toISOString())
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
 
-  if (logsError) throw logsError;
+  if (logsError) throw logsError
 
-  const activityByDay = Array(7).fill(0);
+  const activityByDay = Array(7).fill(0)
   logs.forEach((log) => {
-    const dayIndex = (new Date(log.created_at).getDay() + 6) % 7;
-    activityByDay[dayIndex]++;
-  });
+    const dayIndex = (new Date(log.created_at).getDay() + 6) % 7
+    activityByDay[dayIndex]++
+  })
 
-  return activityByDay;
-};
+  return activityByDay
+}
 
-window.dataService.formatDate = function(dateString) {
-  return new Date(dateString).toLocaleString("en-US", {
+window.dataService.formatDate = (dateString) =>
+  new Date(dateString).toLocaleString("en-US", {
     hour: "numeric",
     minute: "numeric",
     hour12: true,
-  });
-};
+  })
 
-window.dataService.formatRelativeDate = function(dateString) {
-  const date = new Date(dateString);
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
+// Find the formatRelativeDate function and replace it with this improved version that handles timezones correctly
+window.dataService.formatRelativeDate = (dateString) => {
+  // Get the input date in the user's local timezone
+  const inputDate = new Date(dateString)
 
-  if (date.toDateString() === today.toDateString()) return "Today";
-  if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-};
+  // Create today and yesterday dates in the user's local timezone
+  const now = new Date()
 
-window.dataService.getCurrentUserId = async function() {
-  const { data, error } = await window.supabase.auth.getUser();
-  if (error) throw error;
-  return data.user?.id;
-};
+  // Create date objects for today and yesterday at midnight in local timezone
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
 
-window.dataService.getGroupInviteCode = async function(groupId) {
-  const { data, error } = await window.supabase.from("groups").select("invite_code").eq("id", groupId).single();
-  if (error) throw error;
-  return data.invite_code;
-};
+  // Create a date object for the input date at midnight in local timezone for comparison
+  const inputDateMidnight = new Date(inputDate.getFullYear(), inputDate.getMonth(), inputDate.getDate())
 
-window.dataService.getWeeklyCigaretteData = async function(userId) {
-  const weekStart = new Date();
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-  weekStart.setHours(0, 0, 0, 0);
+  // Compare the dates using their time values for accurate comparison
+  if (inputDateMidnight.getTime() === today.getTime()) {
+    return "Today"
+  }
+  if (inputDateMidnight.getTime() === yesterday.getTime()) {
+    return "Yesterday"
+  }
 
-  const weeklyData = Array(7).fill(0);
+  // For other dates, return formatted date
+  return inputDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+}
+
+window.dataService.getCurrentUserId = async () => {
+  const { data, error } = await window.supabase.auth.getUser()
+  if (error) throw error
+  return data.user?.id
+}
+
+window.dataService.getGroupInviteCode = async (groupId) => {
+  const { data, error } = await window.supabase.from("groups").select("invite_code").eq("id", groupId).single()
+  if (error) throw error
+  return data.invite_code
+}
+
+window.dataService.getWeeklyCigaretteData = async (userId) => {
+  const weekStart = new Date()
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay())
+  weekStart.setHours(0, 0, 0, 0)
+
+  const weeklyData = Array(7).fill(0)
 
   const { data, error } = await window.supabase
     .from("cigarette_logs")
     .select("created_at")
     .eq("user_id", userId)
     .gte("created_at", weekStart.toISOString())
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
 
-  if (error) throw error;
+  if (error) throw error
 
   data.forEach((log) => {
-    const date = new Date(log.created_at);
-    const dayIndex = date.getDay();
-    weeklyData[dayIndex]++;
-  });
+    const date = new Date(log.created_at)
+    const dayIndex = date.getDay()
+    weeklyData[dayIndex]++
+  })
 
-  return weeklyData;
-};
+  return weeklyData
+}
 
-window.dataService.getUserInsights = async function(userId) {
-  const insights = [];
+window.dataService.getUserInsights = async (userId) => {
+  const insights = []
 
-  const dayWithMost = await window.dataService.getDayWithMostCigarettes(userId);
+  const dayWithMost = await window.dataService.getDayWithMostCigarettes(userId)
   if (dayWithMost && dayWithMost.date) {
-    const dayName = new Date(dayWithMost.date).toLocaleDateString("en-US", { weekday: "long" });
-    insights.push(`You smoke most on ${dayName}s (avg. ${dayWithMost.count} cigarettes)`);
+    const dayName = new Date(dayWithMost.date).toLocaleDateString("en-US", { weekday: "long" })
+    insights.push(`You smoke most on ${dayName}s (avg. ${dayWithMost.count} cigarettes)`)
   }
 
-  const timeFrame = await window.dataService.getMostSmokedTimeFrame(userId);
+  const timeFrame = await window.dataService.getMostSmokedTimeFrame(userId)
   if (timeFrame) {
-    insights.push(`Your peak smoking time is between ${timeFrame}`);
+    insights.push(`Your peak smoking time is between ${timeFrame}`)
   }
 
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  monthStart.setHours(0, 0, 0, 0);
+  const monthStart = new Date()
+  monthStart.setDate(1)
+  monthStart.setHours(0, 0, 0, 0)
 
-  const today = new Date();
+  const today = new Date()
 
-  const moneySpent = await window.dataService.getMoneySpent(userId, monthStart, today);
-  insights.push(`You've spent approximately $${moneySpent} on cigarettes this month`);
+  const moneySpent = await window.dataService.getMoneySpent(userId, monthStart, today)
+  insights.push(`You've spent approximately $${moneySpent} on cigarettes this month`)
 
   const { data: allLogs, error: logsError } = await window.supabase
     .from("cigarette_logs")
     .select("group_id")
     .eq("user_id", userId)
-    .is("group_id", null);
+    .is("group_id", null)
 
   if (!logsError) {
-    const soloCount = allLogs.filter((log) => !log.group_id).length;
-    const groupCount = allLogs.filter((log) => log.group_id).length;
+    const soloCount = allLogs.filter((log) => !log.group_id).length
+    const groupCount = allLogs.filter((log) => log.group_id).length
 
     if (soloCount > 0 && groupCount > 0) {
-      const ratio = Math.round((groupCount / soloCount) * 100);
+      const ratio = Math.round((groupCount / soloCount) * 100)
       if (ratio > 100) {
-        insights.push(`You smoke ${ratio - 100}% more when in groups`);
+        insights.push(`You smoke ${ratio - 100}% more when in groups`)
       } else {
-        insights.push(`You smoke ${100 - ratio}% less when in groups`);
+        insights.push(`You smoke ${100 - ratio}% less when in groups`)
       }
     }
   }
 
-  return insights;
-};
+  return insights
+}
 
-window.dataService.getUserGroups = async function(userId) {
+window.dataService.getUserGroups = async (userId) => {
   const { data, error } = await window.supabase
-    .from('group_members')
-    .select('group_id, groups(name, description, created_by)')
-    .eq('user_id', userId);
+    .from("group_members")
+    .select("group_id, groups(name, description, created_by)")
+    .eq("user_id", userId)
 
-  if (error) throw error;
-  
+  if (error) throw error
+
   // Transform the data to return group objects with id
-  return data.map(item => ({
+  return data.map((item) => ({
     id: item.group_id,
     name: item.groups.name,
     description: item.groups.description,
-    created_by: item.groups.created_by
-  }));
-};
+    created_by: item.groups.created_by,
+  }))
+}

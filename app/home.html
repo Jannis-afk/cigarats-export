@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Cigarette Tracker</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="/placeholder.svg?height=192&width=192">
+    <link rel="apple-touch-icon" href="/icon_192.png">
     <style>
         :root {
             --primary-color: #8A2BE2; /* Purple */
@@ -893,7 +893,7 @@
     <div class="header">
         <div class="logo">
             <!-- Logo will go here -->
-            <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_192.png?v=1747451429642" alt="App Icon" width="100" height="100" />
+            <img src="/icon_512.png" alt="App Icon" width="100" height="100" />
         </div>
         <div style="margin-bottom: 2px;"></div>
     </div>
@@ -1003,8 +1003,7 @@
 <div class="group-code-container" onclick="copyGroupCode()">
   <div class="group-code-label">Group Code (Tap to Copy)</div>
   <div class="group-code" id="group-code">XYZ123</div>
-</div>
-              
+</div>  
               
                 
                 <div class="tabs">
@@ -1015,7 +1014,7 @@
                 
                 <div id="scoreboard-tab" class="tab-content active">
                     <div style="text-align: center; margin-bottom: 15px; color: var(--text-secondary);">
-                        Least cigarettes smoked this week
+                        Least cigarettes this week
                     </div>
                     <ul class="scoreboard" id="group-scoreboard-list">
                         <!-- Scoreboard will be loaded here -->
@@ -1112,7 +1111,7 @@
                 
                 <div class="profile-header">
                     <div class="profile-avatar" id="avatar-upload">
-                        <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/iconwob_192.png?v=1747451429642" alt="Avatar" width="75" height="75" />
+                        <img src="/icon_192.png" alt="Avatar" width="75" height="75" />
                         <div class="avatar-overlay">
                             <span>Change</span>
                         </div>
@@ -1128,7 +1127,7 @@
                 <div class="timer-container">
                     <div class="timer-label">Smoke-Free Time</div>
                     <div class="timer-value" id="smoke-free-timer">0h 0m</div>
-                    <div class="timer-sublabel">Since your last cigarette</div>
+                    <div class="timer-sublabel"></div>
                 </div>
                 
                 <div class="tabs">
@@ -1190,10 +1189,10 @@
                     </div>
                 </div>
                 
-                <div id="history-tab" class="tab-content">
+                <div id="history-tab" class="tab-content" data-loaded="false">
                     <!-- Cigarette history will be loaded here -->
                     <div style="text-align: center; padding: 20px; color: #ccc;">
-                        Loading history...
+                        Click History to load
                     </div>
                 </div>
                 
@@ -1240,21 +1239,21 @@
     <div class="bottom-nav">
         <a href="#" class="nav-item active" onclick="showScreen('home-screen'); return false;">
             <div class="nav-icon">
-              <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/home_icon_128.png?v=1747536038400" alt="Home" width="32" height="32" />
+              <img src="/icon_home_256.png" alt="Home" width="32" height="32" />
           </div>
             <div>
           </div>
         </a>
         <a href="#" class="nav-item" onclick="showScreen('groups-screen'); return false;">
             <div class="nav-icon">
-                        <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/group_icon_128.png?v=1747536034007" alt="Groups" width="32" height="32" />
+                        <img src="/icon_groups_256.png" alt="Groups" width="32" height="32" />
           </div>
             <div>
           </div>
         </a>
         <a href="#" class="nav-item" onclick="showScreen('profile-screen'); return false;">
             <div class="nav-icon">
-                        <img src="https://cdn.glitch.global/0cf2b6f7-4ba9-4143-8df4-61d1ebe352be/profile_icon_128.png?v=1747536050198" alt="Profile" width="32" height="32" />
+                        <img src="/icon_profile_256.png" alt="Profile" width="32" height="32" />
           </div>
             <div>
           </div>
@@ -1378,11 +1377,11 @@
     <!-- Then load data.js -->
     <script src="data.js"></script>
 
+    <!-- Load upload-cig-pic.js -->
+    <script src="upload-cig-pic.js"></script>
+  
     <!-- Load avatar-upload.js -->
     <script src="avatar-upload.js"></script>
-  
-  <!-- Load upload-cig-pic.js -->
-    <script src="upload-cig-pic.js"></script>
 
     <!-- Finally load home.js -->
     <script src="home.js"></script>
@@ -1521,5 +1520,7 @@
             }, 3000);
         }
     </script>
+  
+  
 </body>
 </html>

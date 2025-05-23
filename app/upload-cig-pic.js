@@ -252,13 +252,6 @@
     selectedPhoto = null
   }
 
-  // Initialize when DOM is loaded
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initCigarettePhotoUpload)
-  } else {
-    initCigarettePhotoUpload()
-  }
-
   // Expose functions for use in other scripts
   window.cigarettePhotoUpload = {
     init: initCigarettePhotoUpload,

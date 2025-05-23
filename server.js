@@ -54,6 +54,10 @@ app.post("/api/avatar-upload", async (req, res) => {
   }
 })
 
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
+
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "app", "index.html"))
 })

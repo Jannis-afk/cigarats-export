@@ -13,21 +13,131 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastCigaretteTime = null
 
     // Function to show toast messages
-    function showToast(message, type = "success") {
-      const toastContainer = document.createElement("div")
-      toastContainer.className = `toast ${type}`
-      toastContainer.textContent = message
-      document.body.appendChild(toastContainer)
+    
+        function showToast(message, type = 'success') {
+            // Check if toast container exists
+            let toastContainer = document.getElementById('toast-container');
+            
+            // Create toast container if it doesn't exist
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast-${type}`;
+            toast.textContent = message;
+            
+            // Add toast to container
+            toastContainer.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toastContainer.contains(toast)) {
+                        toastContainer.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
 
-      setTimeout(() => {
-        document.body.removeChild(toastContainer)
-      }, 3000)
+    // Function to show cigarette details in modal
+    function showCigaretteDetails(cigarette, brand, isGroupCigarette = false) {
+      console.log("Opening cigarette details modal", cigarette) // Debug log
+
+      // Set title
+      document.getElementById("cig-detail-title").textContent = "Cigarette Details"
+
+      // Format date and time
+      const date = new Date(cigarette.created_at)
+      const formattedDate = date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+      const formattedTime = date.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      })
+
+      // Set cigarette info
+      document.getElementById("cig-detail-brand").textContent = brand || "Cigarette"
+      document.getElementById("cig-detail-date").textContent = formattedDate
+      document.getElementById("cig-detail-time").textContent = formattedTime
+
+      // Set notes (or default message if no notes)
+      const notesEl = document.getElementById("cig-detail-notes")
+      notesEl.textContent = cigarette.notes || "No notes added"
+
+      // Handle user info for group cigarettes
+      const userInfoSection = document.getElementById("cig-detail-user")
+      if (isGroupCigarette && cigarette.profiles) {
+        userInfoSection.style.display = "block"
+
+        // Set username
+        document.getElementById("cig-detail-username").textContent = cigarette.profiles.username || "Unknown User"
+
+        // Set avatar
+        const avatarContainer = document.getElementById("cig-detail-avatar")
+        avatarContainer.innerHTML = cigarette.profiles.avatar_url
+          ? `<img src="${cigarette.profiles.avatar_url}" alt="User Avatar" onerror="this.src='/placeholder.svg?height=50&width=50'">`
+          : `<img src="/placeholder.svg?height=50&width=50" alt="User Avatar">`
+      } else {
+        userInfoSection.style.display = "none"
+      }
+
+      // Handle image
+      const imageContainer = document.getElementById("cig-detail-image-container")
+      const imageEl = document.getElementById("cig-detail-image")
+
+      if (cigarette.pic_url) {
+        imageContainer.style.display = "block"
+        imageEl.innerHTML = `<img src="${cigarette.pic_url}" alt="Cigarette Photo" onerror="this.parentNode.innerHTML='No image available'">`
+      } else {
+        imageContainer.style.display = "none"
+        imageEl.innerHTML = ""
+      }
+
+      // Show modal
+      if (typeof window.showModal === "function") {
+        window.showModal("cigarette-detail-modal")
+      } else {
+        // Fallback if showModal function is not available
+        const modal = document.getElementById("cigarette-detail-modal")
+        if (modal) {
+          modal.style.display = "flex"
+        } else {
+          console.error("Modal element not found")
+        }
+      }
     }
 
     // Initialize the application
     async function initApp() {
       try {
         console.log("Initializing app...") // Debug line
+
+        // Hide the log button until initialization is complete
+        const logButton = document.querySelector(".log-button-container")
+        if (logButton) {
+          logButton.style.display = "none"
+          // Add a loading indicator in its place
+          const loadingIndicator = document.createElement("div")
+          loadingIndicator.className = "log-button-loading"
+          loadingIndicator.innerHTML = `
+    <div style="text-align: center; padding: 18px; color: var(--text-secondary);">
+      <div class="loading-spinner" style="width: 24px; height: 24px; margin: 0 auto 10px;"></div>
+      <div>Initializing...</div>
+    </div>
+  `
+          logButton.parentNode.insertBefore(loadingIndicator, logButton)
+        }
 
         // 1. Check authentication
         const {
@@ -56,6 +166,25 @@ document.addEventListener("DOMContentLoaded", () => {
         // 4. Initialize avatar upload
         if (window.avatarUpload && window.avatarUpload.init) {
           window.avatarUpload.init()
+        }
+
+        // Initialize cigarette photo upload
+        if (window.cigarettePhotoUpload && window.cigarettePhotoUpload.init) {
+          window.cigarettePhotoUpload.init()
+          console.log("Cigarette photo upload initialized")
+        } else {
+          console.error("Cigarette photo upload module not found")
+        }
+
+        // Show the log button after initialization is complete
+        const logButtonFinal = document.querySelector(".log-button-container")
+        const loadingIndicatorFinal = document.querySelector(".log-button-loading")
+        if (logButtonFinal) {
+          logButtonFinal.style.display = "block"
+          if (loadingIndicatorFinal) {
+            loadingIndicatorFinal.remove()
+          }
+          console.log("Log button is now visible - initialization complete")
         }
       } catch (error) {
         console.error("Initialization error:", error)
@@ -159,8 +288,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Load profile stats
         await loadProfileStats()
 
-        // Load cigarette history
-        await loadCigaretteHistory()
+        // Note: We're removing the loadCigaretteHistory call here
+        // It will be loaded on demand when the history tab is clicked
       } catch (error) {
         console.error("Error loading home screen data:", error)
         showError("Failed to load data. Please try again later.")
@@ -226,7 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // If there's a photo URL, use it instead of the emoji
           if (cigarette.pic_url) {
             iconHtml = `
-              <div class="recent-icon" style="width: 40px; height: 40px; overflow: hidden; border-radius: 5px;">
+              <div class="recent-icon" style="width: 40px; height: 40px; min-width: 40px; overflow: hidden; border-radius: 5px;">
                 <img src="${cigarette.pic_url}" 
                      alt="Cigarette Photo" 
                      style="width: 100%; height: 100%; object-fit: cover;"
@@ -237,13 +366,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const listItem = document.createElement("li")
           listItem.className = "recent-item"
+          listItem.style.alignItems = "flex-start" // Align items to the top
           listItem.innerHTML = `
-                      <div class="recent-info">
-                          <div class="recent-brand">${profile.cigarette_brand || "Cigarette"}</div>
-                          <div class="recent-meta">${relativeDate}, ${timeString} • ${cigarette.notes || "Solo"}</div>
-                      </div>
-                      ${iconHtml}
-                  `
+  <div class="recent-info" style="flex: 1; min-width: 0;">
+      <div class="recent-brand">${profile.cigarette_brand || "Cigarette"}</div>
+      <div class="recent-meta" style="word-wrap: break-word;">${relativeDate}, ${timeString} • ${cigarette.notes || ""}</div>
+  </div>
+  ${iconHtml}
+`
 
           recentList.appendChild(listItem)
         })
@@ -467,6 +597,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // Load group activity
     async function loadGroupActivity(groupId) {
       try {
+        // Clear the activity tab content first to prevent duplicates
+        const activityTab = document.getElementById("activity-tab")
+
+        // Preserve the chart element which should be the first child
+        const chartElement = activityTab.querySelector(".chart-container")
+        const statsElement = activityTab.querySelector(".stats-container")
+
+        // Clear everything else
+        activityTab.innerHTML = ""
+
+        // Re-add the chart and stats elements
+        if (chartElement) activityTab.appendChild(chartElement)
+        if (statsElement) activityTab.appendChild(statsElement)
+
         // Get group activity
         const activity = await window.dataService.getGroupActivity(groupId)
 
@@ -517,6 +661,17 @@ document.addEventListener("DOMContentLoaded", () => {
         statValues[2].textContent = `$${totalMoneySpent.toFixed(0)}`
         statValues[3].textContent = timeSpent
 
+        // Remove existing cigarette list if it exists
+        const existingHeader = document.querySelector("#activity-tab h3")
+        if (existingHeader) {
+          // Find and remove the header and the list that follows it
+          const existingList = document.querySelector("#activity-tab .group-cigs-list")
+          if (existingList) {
+            existingList.remove()
+          }
+          existingHeader.remove()
+        }
+
         // Get last 10 cigarettes smoked by group members
         const { data: groupCigs, error: groupCigsError } = await window.supabase
           .from("cigarette_logs")
@@ -538,7 +693,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           // Create a section header for the cigarette list
           const cigListHeader = document.createElement("h3")
-          cigListHeader.textContent = "Last 10 Cigarettes by Group Members"
+          cigListHeader.textContent = "Last Cigarettes"
           cigListHeader.style.marginTop = "30px"
           cigListHeader.style.marginBottom = "15px"
           document.getElementById("activity-tab").appendChild(cigListHeader)
@@ -564,10 +719,11 @@ document.addEventListener("DOMContentLoaded", () => {
               const cigItem = document.createElement("div")
               cigItem.className = "group-item"
               cigItem.style.marginBottom = "10px"
+              cigItem.style.alignItems = "flex-start" // Align items to the top
 
               // Create user avatar and info
               const avatarHtml = `
-                <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; margin-right: 10px;">
+                <div style="width: 40px; height: 40px; min-width: 40px; border-radius: 50%; overflow: hidden; margin-right: 10px;">
                   <img src="${cig.profiles?.avatar_url || "/placeholder.svg?height=40&width=40"}" 
                        alt="User Avatar" 
                        style="width: 100%; height: 100%; object-fit: cover;"
@@ -579,7 +735,7 @@ document.addEventListener("DOMContentLoaded", () => {
               let cigImageHtml = ""
               if (cig.pic_url) {
                 cigImageHtml = `
-                  <div style="width: 50px; height: 50px; border-radius: 5px; overflow: hidden; margin-left: 10px;">
+                  <div style="width: 50px; height: 50px; min-width: 50px; border-radius: 5px; overflow: hidden; margin-left: 10px;">
                     <img src="${cig.pic_url}" 
                          alt="Cigarette Photo" 
                          style="width: 100%; height: 100%; object-fit: cover;"
@@ -587,22 +743,30 @@ document.addEventListener("DOMContentLoaded", () => {
                   </div>
                 `
               } else {
-                cigImageHtml = `<div style="margin-left: 10px; font-size: 24px;">🚬</div>`
+                cigImageHtml = `<div style="margin-left: 10px; min-width: 24px; font-size: 24px;">🚬</div>`
               }
 
               cigItem.innerHTML = `
-                <div style="display: flex; align-items: center;">
-                  ${avatarHtml}
-                  <div>
-                    <div style="font-weight: bold;">${cig.profiles?.username || "Unknown User"}</div>
-                    <div style="font-size: 12px; color: var(--text-secondary);">${relativeTime}, ${timeString}</div>
-                  </div>
-                </div>
-                <div style="display: flex; align-items: center;">
-                  ${cig.notes ? `<div style="margin-right: 10px; font-size: 12px; color: var(--text-secondary);">${cig.notes}</div>` : ""}
-                  ${cigImageHtml}
-                </div>
-              `
+  <div style="display: flex; align-items: flex-start; flex: 1; min-width: 0;">
+    ${avatarHtml}
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-weight: bold;">${cig.profiles?.username || "Unknown User"}</div>
+      <div style="font-size: 12px; color: var(--text-secondary);">${relativeTime}, ${timeString}</div>
+      ${cig.notes ? `<div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; word-wrap: break-word;">${cig.notes}</div>` : ""}
+    </div>
+  </div>
+  <div style="flex-shrink: 0; margin-left: 10px;">
+    ${cigImageHtml}
+  </div>
+`
+              // Add click event to show details
+              cigItem.addEventListener("click", () => {
+                // Get the brand from the user's profile if available
+                const memberProfile = members.find((m) => m.id === cig.user_id)
+                const brand = memberProfile?.cigarette_brand || "Cigarette"
+
+                showCigaretteDetails(cig, brand, true)
+              })
 
               cigList.appendChild(cigItem)
             })
@@ -700,19 +864,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Get all cigarette logs with a limit of 20
         const logs = await window.dataService.getUserCigaretteLogs(currentUserId, 20)
 
-        // Group by date
-        const logsByDate = {}
-        logs.forEach((log) => {
-          const date = new Date(log.created_at)
-          const dateString = date.toISOString().split("T")[0]
-
-          if (!logsByDate[dateString]) {
-            logsByDate[dateString] = []
-          }
-
-          logsByDate[dateString].push(log)
-        })
-
         // Get user profile for cigarette brand
         const profile = await window.dataService.getUserProfile(currentUserId)
 
@@ -721,85 +872,54 @@ document.addEventListener("DOMContentLoaded", () => {
         historyTab.innerHTML = ""
 
         // Add cigarettes to history
-        const dateKeys = Object.keys(logsByDate).sort().reverse()
+        logs.forEach((log) => {
+          const date = new Date(log.created_at)
+          const relativeDate = window.dataService.formatRelativeDate(date)
+          const timeString = window.dataService.formatDate(date)
 
-        // Limit to last 7 days
-        const recentDates = dateKeys.slice(0, 7)
+          // Create icon element - either photo or emoji
+          let iconHtml = "🚬"
 
-        recentDates.forEach((dateString) => {
-          const date = new Date(dateString)
-          const today = new Date()
-          const yesterday = new Date()
-          yesterday.setDate(yesterday.getDate() - 1)
-
-          let dateLabel = ""
-          if (date.toDateString() === today.toDateString()) {
-            dateLabel = "Today"
-          } else if (date.toDateString() === yesterday.toDateString()) {
-            dateLabel = "Yesterday"
-          } else {
-            dateLabel = date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
+          // If there's a photo URL, use it instead of the emoji
+          if (log.pic_url) {
+            iconHtml = `
+          <div style="width: 40px; height: 40px; min-width: 40px; overflow: hidden; border-radius: 5px;">
+            <img src="${log.pic_url}" 
+                 alt="Cigarette Photo" 
+                 style="width: 100%; height: 100%; object-fit: cover;"
+                 onerror="this.parentNode.innerHTML='🚬'">
+          </div>
+        `
           }
 
-          const dateSection = document.createElement("div")
-          dateSection.style.marginBottom = "20px"
-          dateSection.innerHTML = `<div style="font-weight: bold; margin-bottom: 10px;">${dateLabel}</div>`
+          const item = document.createElement("div")
+          item.className = "recent-item"
+          item.style.alignItems = "flex-start"
+          item.style.marginBottom = "10px"
+          item.innerHTML = `
+        <div class="recent-info" style="flex: 1; min-width: 0;">
+            <div class="recent-brand">${profile.cigarette_brand || "Cigarette"}</div>
+            <div class="recent-meta" style="word-wrap: break-word;">${relativeDate}, ${timeString} • ${log.notes || ""}</div>
+        </div>
+        <div style="flex-shrink: 0;">${iconHtml}</div>
+      `
 
-          // Add cigarettes for this date
-          logsByDate[dateString].forEach((log) => {
-            const time = new Date(log.created_at).toLocaleString("en-US", {
-              hour: "numeric",
-              minute: "numeric",
-              hour12: true,
-            })
-
-            // Create icon element - either photo or emoji
-            let iconHtml = "🚬"
-
-            // If there's a photo URL, use it instead of the emoji
-            if (log.pic_url) {
-              iconHtml = `
-                <div style="width: 40px; height: 40px; overflow: hidden; border-radius: 5px;">
-                  <img src="${log.pic_url}" 
-                       alt="Cigarette Photo" 
-                       style="width: 100%; height: 100%; object-fit: cover;"
-                       onerror="this.parentNode.innerHTML='🚬'">
-                </div>
-              `
-            }
-
-            const item = document.createElement("div")
-            item.className = "group-item"
-            item.style.cursor = "default"
-            item.innerHTML = `
-                        <div class="group-info">
-                            <div class="group-name">${profile.cigarette_brand || "Cigarette"}</div>
-                            <div class="group-meta">${time} • ${log.notes || "Solo"}</div>
-                        </div>
-                        <div>${iconHtml}</div>
-                    `
-
-            dateSection.appendChild(item)
-          })
-
-          historyTab.appendChild(dateSection)
+          historyTab.appendChild(item)
         })
 
-        // Add load more button if there are more dates
-        if (dateKeys.length > recentDates.length) {
+        // Add load more button if there are exactly 20 logs (indicating there might be more)
+        if (logs.length === 20) {
           const loadMoreBtn = document.createElement("button")
           loadMoreBtn.className = "btn btn-block"
           loadMoreBtn.style.marginTop = "20px"
           loadMoreBtn.textContent = "Load More"
-          loadMoreBtn.addEventListener("click", () =>
-            loadMoreHistory(dateKeys, logsByDate, profile, recentDates.length),
-          )
+          loadMoreBtn.addEventListener("click", () => loadMoreHistorySimple(20))
 
           historyTab.appendChild(loadMoreBtn)
         }
 
         // If no logs, show message
-        if (dateKeys.length === 0) {
+        if (logs.length === 0) {
           const message = document.createElement("div")
           message.style.textAlign = "center"
           message.style.padding = "20px"
@@ -808,17 +928,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
           historyTab.appendChild(message)
         }
+
+        historyTab.setAttribute("data-loaded", "true")
       } catch (error) {
         console.error("Error loading cigarette history:", error)
         showError("Failed to load cigarette history. Please try again later.")
       }
     }
 
-    // Load more history
-    function loadMoreHistory(allDates, logsByDate, profile, startIndex) {
+    // Load more history (simplified version)
+    async function loadMoreHistorySimple(currentCount) {
       try {
-        // Get next 7 days
-        const nextDates = allDates.slice(startIndex, startIndex + 7)
+        // Get next batch of cigarette logs
+        const logs = await window.dataService.getUserCigaretteLogs(currentUserId, currentCount + 20)
+
+        // Get only the new logs (skip the ones we already have)
+        const newLogs = logs.slice(currentCount)
+
+        // Get user profile for cigarette brand
+        const profile = await window.dataService.getUserProfile(currentUserId)
 
         // Get history tab
         const historyTab = document.getElementById("history-tab")
@@ -829,64 +957,49 @@ document.addEventListener("DOMContentLoaded", () => {
           historyTab.removeChild(loadMoreBtn)
         }
 
-        // Add cigarettes to history
-        nextDates.forEach((dateString) => {
-          const date = new Date(dateString)
-          const dateLabel = date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
+        // Add new cigarettes to history
+        newLogs.forEach((log) => {
+          const date = new Date(log.created_at)
+          const relativeDate = window.dataService.formatRelativeDate(date)
+          const timeString = window.dataService.formatDate(date)
 
-          const dateSection = document.createElement("div")
-          dateSection.style.marginBottom = "20px"
-          dateSection.innerHTML = `<div style="font-weight: bold; margin-bottom: 10px;">${dateLabel}</div>`
+          // Create icon element - either photo or emoji
+          let iconHtml = "🚬"
 
-          // Add cigarettes for this date
-          logsByDate[dateString].forEach((log) => {
-            const time = new Date(log.created_at).toLocaleString("en-US", {
-              hour: "numeric",
-              minute: "numeric",
-              hour12: true,
-            })
+          // If there's a photo URL, use it instead of the emoji
+          if (log.pic_url) {
+            iconHtml = `
+          <div style="width: 40px; height: 40px; min-width: 40px; overflow: hidden; border-radius: 5px;">
+            <img src="${log.pic_url}" 
+                 alt="Cigarette Photo" 
+                 style="width: 100%; height: 100%; object-fit: cover;"
+                 onerror="this.parentNode.innerHTML='🚬'">
+          </div>
+        `
+          }
 
-            // Create icon element - either photo or emoji
-            let iconHtml = "🚬"
+          const item = document.createElement("div")
+          item.className = "recent-item"
+          item.style.alignItems = "flex-start"
+          item.style.marginBottom = "10px"
+          item.innerHTML = `
+        <div class="recent-info" style="flex: 1; min-width: 0;">
+            <div class="recent-brand">${profile.cigarette_brand || "Cigarette"}</div>
+            <div class="recent-meta" style="word-wrap: break-word;">${relativeDate}, ${timeString} • ${log.notes || ""}</div>
+        </div>
+        <div style="flex-shrink: 0;">${iconHtml}</div>
+      `
 
-            // If there's a photo URL, use it instead of the emoji
-            if (log.pic_url) {
-              iconHtml = `
-                <div style="width: 40px; height: 40px; overflow: hidden; border-radius: 5px;">
-                  <img src="${log.pic_url}" 
-                       alt="Cigarette Photo" 
-                       style="width: 100%; height: 100%; object-fit: cover;"
-                       onerror="this.parentNode.innerHTML='🚬'">
-                </div>
-              `
-            }
-
-            const item = document.createElement("div")
-            item.className = "group-item"
-            item.style.cursor = "default"
-            item.innerHTML = `
-                    <div class="group-info">
-                        <div class="group-name">${profile.cigarette_brand || "Cigarette"}</div>
-                        <div class="group-meta">${time} • ${log.notes || "Solo"}</div>
-                    </div>
-                    <div>${iconHtml}</div>
-                `
-
-            dateSection.appendChild(item)
-          })
-
-          historyTab.appendChild(dateSection)
+          historyTab.appendChild(item)
         })
 
-        // Add load more button if there are more dates
-        if (allDates.length > startIndex + nextDates.length) {
+        // Add load more button if there are more logs
+        if (logs.length === currentCount + 20) {
           const newLoadMoreBtn = document.createElement("button")
           newLoadMoreBtn.className = "btn btn-block"
           newLoadMoreBtn.style.marginTop = "20px"
           newLoadMoreBtn.textContent = "Load More"
-          newLoadMoreBtn.addEventListener("click", () =>
-            loadMoreHistory(allDates, logsByDate, profile, startIndex + nextDates.length),
-          )
+          newLoadMoreBtn.addEventListener("click", () => loadMoreHistorySimple(currentCount + 20))
 
           historyTab.appendChild(newLoadMoreBtn)
         }
@@ -1113,6 +1226,17 @@ document.addEventListener("DOMContentLoaded", () => {
           showToast("Failed to log out. Please try again later.", "error")
         }
       })
+
+      // Add event listener for the history tab
+      const historyTabButton = document.querySelectorAll("#profile-screen .tab")[1]
+      if (historyTabButton) {
+        historyTabButton.addEventListener("click", () => {
+          const historyTab = document.getElementById("history-tab")
+          if (historyTab && historyTab.getAttribute("data-loaded") !== "true") {
+            loadCigaretteHistory()
+          }
+        })
+      }
     }
 
     // Update smoke-free duration
@@ -1207,4 +1331,65 @@ window.dataService.getGroupScoreboard = async (groupId) => {
   )
 
   return scoreboard.sort((a, b) => a.count - b.count)
+}
+
+// Add this function to ensure the log cigarette modal is properly initialized
+function ensureLogModalInitialized() {
+  // Check if the modal elements exist
+  const logModal = document.getElementById("log-modal")
+  const photoUploadArea = document.getElementById("cigarette-photo-upload")
+  const photoInput = document.getElementById("cigarette-photo-input")
+
+  if (!logModal || !photoUploadArea || !photoInput) {
+    console.error("Log modal elements not found, cannot initialize")
+    return false
+  }
+
+  // Initialize cigarette photo upload if it exists but hasn't been initialized
+  if (window.cigarettePhotoUpload && typeof window.cigarettePhotoUpload.init === "function") {
+    window.cigarettePhotoUpload.init()
+    console.log("Cigarette photo upload initialized from ensureLogModalInitialized")
+  }
+
+  return true
+}
+
+// Modify the showModal function to ensure initialization when opening the log modal
+if (typeof window.showModal !== "function") {
+  window.showModal = (modalId) => {
+    const modal = document.getElementById(modalId)
+    if (modal) {
+      // If opening the log modal, ensure it's initialized first
+      if (modalId === "log-modal") {
+        if (!ensureLogModalInitialized()) {
+          console.error("Cannot open log modal - required elements not found")
+          //showToast("App is still initializing. Please try again in a moment.", "error")
+          return
+        }
+      }
+
+      modal.style.display = "flex"
+    }
+  }
+}
+
+// Add this function at the end of the file, outside any other functions
+// Ensure we have a hideModal function if it doesn't exist
+if (typeof window.hideModal !== "function") {
+  window.hideModal = (modalId) => {
+    const modal = document.getElementById(modalId)
+    if (modal) {
+      modal.style.display = "none"
+    }
+  }
+}
+
+// Ensure we have a showModal function if it doesn't exist
+if (typeof window.showModal !== "function") {
+  window.showModal = (modalId) => {
+    const modal = document.getElementById(modalId)
+    if (modal) {
+      modal.style.display = "flex"
+    }
+  }
 }
