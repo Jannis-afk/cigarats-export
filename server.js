@@ -7,6 +7,7 @@ const app = express()
 const PORT = process.env.PORT || 3000
 const startTime = Date.now(); // Record when server script starts
 
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors()) // ✅ Enable CORS before other middleware
 app.use(express.static(path.join(__dirname, "app")))
 app.use(express.json()) // Add JSON body parser for API endpoints
@@ -59,12 +60,9 @@ app.get('/ping', (req, res) => {
   res.send('pong');
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
-
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "app", "index.html"))
 })
-
 
 //app.use(express.static(__dirname + '/app/public'));
 
