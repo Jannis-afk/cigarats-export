@@ -59,11 +59,13 @@ app.get('/ping', (req, res) => {
   res.send('pong');
 });
 
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "app", "index.html"))
 })
 
-app.use(express.static(path.join(__dirname, 'public')));
+
 //app.use(express.static(__dirname + '/app/public'));
 
 app.listen(PORT, () => {
