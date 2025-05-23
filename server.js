@@ -62,7 +62,7 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "app", "index.html"))
 })
 
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/app/public'));
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`)
