@@ -247,23 +247,20 @@
                     password: password
                 });
 
-                if (error) {
-    console.error('Login error:', error);
-    throw error;
-}
+                if (error) {  
+                console.error('Login error:', error);  
+                throw error;  
+            }  
 
-console.log('Login successful:', data);
-window.location.href = 'home.html';
-} catch (error) {
-    console.error('Error in login process:', error);
-    
-    // Suppress only "Failed to fetch"
-    if (error.message !== 'Failed to fetch') {
-        alert('Login failed: ' + error.message);
-    } else {
-        console.warn('Suppressed network error:', error.message);
+            console.log('Login successful:', data);  
+            window.location.href = 'home.html';  
+        } catch (error) {  
+            console.error('Error in login process:', error);  
+            alert('Login failed: ' + error.message);  
+        }  
     }
-}
+
+
         
         async function forgotPassword() {
             const email = document.getElementById('email').value;
