@@ -1166,6 +1166,8 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelector("#settings-tab form").addEventListener("submit", async (event) => {
         event.preventDefault()
 
+        showToast("Saving settings...")
+
         try {
           // Get form values
           const username = document.querySelector('#settings-tab input[type="text"]').value
